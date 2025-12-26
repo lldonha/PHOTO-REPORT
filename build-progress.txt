@@ -159,15 +159,29 @@ Rationale: This is a significant new feature that introduces a new domain entity
 - src/api/v1/endpoints/reports.py - API endpoint pattern
 - src/frontend/index.html - Frontend UI pattern
 
-Session 1 (Planner - Spec 010):
+Session 1 (Planner - Spec 010) - UPDATED:
 - Created implementation_plan.json
-- Phases: 6
-- Total subtasks: 10
+- Phases: 7 (added setup phase for infrastructure missing from main branch)
+- Total subtasks: 13
 - Updated project_index.json
 - Updated context.json
 
+IMPORTANT DISCOVERY:
+The main branch has minimal structure. Key infrastructure exists only in worktrees:
+- Core config/database modules: in worktree-004
+- Base SQLAlchemy models: in worktree-004
+- Frontend index.html: in worktree-005
+- Alembic configuration: in worktree-004
+
+Added phase-0-setup to bootstrap this infrastructure before implementing obras feature.
+
 Phase Summary:
-1. [phase-1-backend-model] Backend Model & Repository: 3 subtasks, depends on []
+0. [phase-0-setup] Setup Project Structure: 3 subtasks, depends on []
+   - Create core config and database modules (config.py, database.py)
+   - Create base model with TimestampMixin
+   - Setup Alembic for database migrations
+
+1. [phase-1-backend-model] Backend Model & Repository: 3 subtasks, depends on [phase-0-setup]
    - Create Obra SQLAlchemy model (id, nome, endereco, cliente, status, timestamps)
    - Create Obra Pydantic schemas (Create, Update, Response, ListResponse)
    - Create ObraRepository with CRUD operations and status filter

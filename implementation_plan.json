@@ -4,19 +4,74 @@
   "workflow_rationale": "This is a significant new feature that introduces a new domain entity (Obra/Project), requires database schema changes, API endpoints, and frontend UI components. It follows the feature workflow with backend first, then frontend, then integration phases.",
   "phases": [
     {
+      "id": "phase-0-setup",
+      "name": "Setup Project Structure",
+      "type": "setup",
+      "description": "Create missing directories, __init__.py files, and core infrastructure that exists in worktrees but not in main branch",
+      "depends_on": [],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-0-1",
+          "description": "Create core config and database modules (config.py, database.py) following worktree patterns",
+          "service": "backend",
+          "files_to_modify": [],
+          "files_to_create": ["src/core/__init__.py", "src/core/config.py", "src/core/database.py"],
+          "patterns_from": [".worktrees/004-persist-ncia-real-no-postgresql/src/core/config.py", ".worktrees/004-persist-ncia-real-no-postgresql/src/core/database.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.core.config import settings; print('Config OK')\"",
+            "expected": "Config OK"
+          },
+          "status": "pending",
+          "notes": "Settings class with DATABASE_URL, DEBUG, UPLOAD_DIR. Database module with async engine, session maker, get_async_session dependency."
+        },
+        {
+          "id": "subtask-0-2",
+          "description": "Create base model with TimestampMixin for SQLAlchemy models",
+          "service": "backend",
+          "files_to_modify": [],
+          "files_to_create": ["src/models/__init__.py", "src/models/base.py"],
+          "patterns_from": [".worktrees/004-persist-ncia-real-no-postgresql/src/models/base.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.models.base import Base, TimestampMixin; print('Base OK')\"",
+            "expected": "Base OK"
+          },
+          "status": "pending",
+          "notes": "DeclarativeBase and TimestampMixin with created_at/updated_at auto-managed fields."
+        },
+        {
+          "id": "subtask-0-3",
+          "description": "Setup Alembic for database migrations",
+          "service": "backend",
+          "files_to_modify": [],
+          "files_to_create": ["alembic.ini", "alembic/env.py", "alembic/script.py.mako", "alembic/versions/.gitkeep"],
+          "patterns_from": [".worktrees/004-persist-ncia-real-no-postgresql/alembic.ini", ".worktrees/004-persist-ncia-real-no-postgresql/alembic/env.py"],
+          "verification": {
+            "type": "command",
+            "command": "test -f alembic.ini && test -f alembic/env.py && echo 'Alembic OK'",
+            "expected": "Alembic OK"
+          },
+          "status": "pending",
+          "notes": "Alembic configuration with async support. env.py imports Base metadata from src.models."
+        }
+      ]
+    },
+    {
       "id": "phase-1-backend-model",
       "name": "Backend Model & Repository",
       "type": "implementation",
       "description": "Create Obra SQLAlchemy model, Pydantic schemas, and repository pattern",
-      "depends_on": [],
+      "depends_on": ["phase-0-setup"],
       "parallel_safe": true,
       "subtasks": [
         {
           "id": "subtask-1-1",
           "description": "Create Obra SQLAlchemy model following PhotoReport pattern",
           "service": "backend",
-          "files_to_modify": [],
-          "files_to_create": ["src/models/obra.py", "src/models/__init__.py"],
+          "files_to_modify": ["src/models/__init__.py"],
+          "files_to_create": ["src/models/obra.py"],
           "patterns_from": [".worktrees/004-persist-ncia-real-no-postgresql/src/models/photo_report.py", ".worktrees/004-persist-ncia-real-no-postgresql/src/models/base.py"],
           "verification": {
             "type": "command",
@@ -253,8 +308,8 @@
     }
   ],
   "summary": {
-    "total_phases": 6,
-    "total_subtasks": 10,
+    "total_phases": 7,
+    "total_subtasks": 13,
     "services_involved": ["backend", "frontend", "postgresql"],
     "parallelism": {
       "max_parallel_phases": 2,
