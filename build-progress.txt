@@ -213,3 +213,113 @@ To start the development environment manually:
   # - API Docs: http://localhost:8002/docs
 
 === END SESSION 1 (PLANNER - SPEC 005) ===
+
+================================================================================
+================================================================================
+
+=== SPEC 006 - CACHE DE MINI MAPAS OSM ===
+
+Project: PHOTO-REPORT - Cache de Mini Mapas OSM
+Started: 2025-12-26 (Planner Session for Spec 006)
+
+Workflow Type: feature
+Rationale: Novo recurso que adiciona funcionalidade de cache ao serviço de mapas
+           existente. Envolve criação de novo módulo de cache, modificação do
+           MapService para usar o cache, e novas configurações de ambiente.
+
+## Investigation Summary
+
+### py-staticmaps Library Analysis:
+- TileDownloader class already has basic caching to disk
+- Cache files stored at: {cache_dir}/{provider_name}/{z}/{x}/{y}.png
+- Context.set_cache_dir() and Context.set_tile_downloader() provide hooks
+- **LACKS**: TTL expiration, LRU eviction, size limits, offline fallback
+
+### Implementation Approach:
+- Create CachedTileDownloader extending staticmaps.TileDownloader
+- Override get() method to add TTL checking before returning cached tiles
+- Implement cleanup() for expired tiles removal
+- Implement evict_lru() for size-based eviction
+- Use threading.Lock for thread-safety
+- Follow singleton pattern with get_tile_cache_service()
+
+Session 1 (Planner - Spec 006):
+- Created implementation_plan.json
+- Phases: 5
+- Total subtasks: 6
+- Updated context.json with investigation findings
+- Reused existing init.sh
+
+Phase Summary:
+1. [phase-1-config] Configurações de Cache: 2 subtasks, no dependencies
+   - Adicionar CACHE_DIR, CACHE_MAX_SIZE_MB, CACHE_TTL_DAYS ao Settings
+   - Adicionar variáveis de ambiente ao .env.example
+
+2. [phase-2-cache-service] Serviço de Cache de Tiles: 1 subtask, depends on Phase 1
+   - Criar TileCacheService com CachedTileDownloader
+   - TTL check, LRU eviction, fallback offline
+
+3. [phase-3-integration] Integração com MapService: 1 subtask, depends on Phase 2
+   - Modificar MapService para usar CachedTileDownloader
+   - Usar context.set_tile_downloader() e context.set_cache_dir()
+
+4. [phase-4-tests] Testes Unitários e Integração: 2 subtasks, depends on Phase 3
+   - Criar testes unitários para TileCacheService
+   - Verificar regressão em testes existentes do MapService
+
+5. [phase-5-verification] Verificação Final: 1 subtask, depends on Phase 4
+   - Verificação end-to-end do cache
+
+Services Involved:
+- main (primary): Backend FastAPI com MapService a ser modificado
+
+Files to Create (2):
+- src/services/tile_cache_service.py - Serviço de cache com CachedTileDownloader
+- tests/test_tile_cache_service.py - Testes unitários
+
+Files to Modify (3):
+- src/core/config.py - Adicionar configurações de cache
+- src/services/map_service.py - Integrar com TileCacheService
+- .env.example - Adicionar variáveis de cache
+
+Parallelism Analysis:
+- Max parallel phases: 1
+- Recommended workers: 1 (sequential - phases have dependencies)
+- Parallel groups: None (strict linear dependency chain)
+
+Risk Level: LOW
+- Additive feature with fallback to existing behavior
+- Standard disk caching patterns
+- No security implications
+
+Verification Strategy:
+- Unit tests for cache logic (hit/miss/expiry/cleanup/LRU)
+- Integration tests for MapService with caching
+- Regression tests for existing MapService functionality
+
+Success Criteria:
+- [ ] Tiles são cacheados em disco por 7 dias (configurável)
+- [ ] Cache reduz requests OSM em 80%+ para mesma região
+- [ ] Fallback funciona se OSM estiver offline
+- [ ] Cache limpa automaticamente tiles antigos
+- [ ] Tamanho máximo de cache configurável
+- [ ] Testes existentes continuam passando
+
+=== STARTUP COMMAND (SPEC 006) ===
+
+To continue building this spec, run:
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 006 --parallel 1
+
+To start the development environment manually:
+
+  # 1. Install dependencies (if needed)
+  pip install -r requirements.txt
+
+  # 2. Start API
+  uvicorn src.main:app --reload --port 8000
+
+  # 3. Run tests
+  pytest tests/ -v
+
+=== END SESSION 1 (PLANNER - SPEC 006) ===
