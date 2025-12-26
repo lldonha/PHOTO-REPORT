@@ -1,0 +1,55 @@
+# Photo Report System - Docker Compose Configuration
+# Container Python com FastAPI para processamento de fotos
+
+version: "3.8"
+
+services:
+  photo-processor:
+    container_name: photo-processor
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: photo-processor:1.0.0
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=America/Sao_Paulo
+      # Database connection (PostgreSQL existente)
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_NAME=cosmic
+      - DB_USER=lucas
+    volumes:
+      # Mount do código Python para desenvolvimento
+      - ../python:/app:ro
+      # Diretório temporário para processamento
+      - photo-temp:/tmp/photo-processor
+    networks:
+      - coletor_default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+networks:
+  coletor_default:
+    external: true
+
+volumes:
+  photo-temp:
+    driver: local
