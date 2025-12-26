@@ -1,0 +1,31 @@
+# Cloudflare Tunnel Configuration for PHOTO-REPORT
+# Expõe frontend (porta 3000) e backend (porta 8002)
+
+# Para usar este arquivo:
+# 1. Login: cloudflared tunnel login
+# 2. Criar tunnel: cloudflared tunnel create photo-report
+# 3. Copiar o tunnel ID e credentials file path abaixo
+# 4. Executar: cloudflared tunnel --config cloudflared-config.yml run
+
+# INSTRUÇÕES:
+# Substitua <TUNNEL_ID> pelo ID do seu tunnel
+# Substitua <CREDENTIALS_FILE> pelo path do arquivo .json gerado
+
+# tunnel: <TUNNEL_ID>
+# credentials-file: C:\Users\<SEU_USUARIO>\.cloudflared\<TUNNEL_ID>.json
+
+ingress:
+  # Frontend - UI do usuário
+  - hostname: photo-report.yourdomain.com
+    service: http://localhost:3000
+
+  # Backend API - endpoints de processamento
+  - hostname: api-photo-report.yourdomain.com
+    service: http://localhost:8002
+
+  # Fallback - captura qualquer outro tráfego
+  - service: http_status:404
+
+# Configurações opcionais
+# protocol: http2
+# no-tls-verify: false
