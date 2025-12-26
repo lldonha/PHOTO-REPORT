@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "E:\\Projetos\\PHOTO-REPORT\\.worktrees\\001-criar-sistema-photo-report-completo\\logs\\.2f9ceb9ad5a889333f30f8a843942f01dc1ff7c7-audit.json",
+    "files": [
+        {
+            "date": 1766708192300,
+            "name": "E:\\Projetos\\PHOTO-REPORT\\.worktrees\\001-criar-sistema-photo-report-completo\\logs\\mcp-puppeteer-2025-12-25.log",
+            "hash": "9ef62701d2f746e527411704a85096af0d9d6e2205339fa11d47673efcfa1dd0"
+        }
+    ],
+    "hashType": "sha256"
+}
