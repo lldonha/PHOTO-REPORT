@@ -1,14 +1,32 @@
-# PHOTO-REPORT
+# 📷 PHOTO-REPORT
 
-Sistema web para engenheiros gerarem relatórios fotográficos de obra com extração automática de metadados EXIF, overlay editável e geração de PDF padronizado.
+> Sistema completo para geração de relatórios fotográficos de obras com extração automática de metadados EXIF, GPS, mini-mapas e geração de PDF profissional.
 
-## Funcionalidades
+[![Status](https://img.shields.io/badge/status-funcionando-success)](https://github.com/lldonha/PHOTO-REPORT)
+[![Python](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100.0-green)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/docker-ready-blue)](https://www.docker.com/)
 
-- **Upload em Lote**: Upload de até 100 fotos simultaneamente via drag-and-drop
-- **Extração EXIF Automática**: Data/hora, coordenadas GPS e direção da bússola
-- **Mini Mapas**: Geração de mapas estáticos 150x150 com localização
-- **Overlay Editável**: Barra inferior com metadados e legenda customizável
-- **Geração de PDF**: Relatório A4 com 6 fotos por página (grid 2x3)
+## ✨ Funcionalidades
+
+### ✅ Implementado (v1.0.0)
+
+- **📸 Upload de Fotos**: Drag-and-drop ou clique para selecionar até 100 fotos (JPEG/PNG)
+- **🗺️ Extração EXIF**: Data/hora, coordenadas GPS, direção da câmera automática
+- **🌍 Mini-mapa Automático**: Geração de mapa com localização (OpenStreetMap)
+- **🎨 Overlay com Metadados**: Máscara na foto com data, GPS, direção e legenda
+- **📄 Geração de PDF**: Relatório A4 com layout 2x3 (6 fotos por página)
+- **⚡ CORS Configurado**: Frontend e backend funcionando perfeitamente
+- **🐳 Docker Ready**: Containerização completa do backend
+
+### 🚧 Próximas Melhorias
+
+Veja [TODO.md](./TODO.md) para detalhes completos.
+
+1. **🎨 Melhorar Overlay**: Design elegante com ícones, layout otimizado
+2. **📄 Melhorar PDF**: Cabeçalho profissional, rodapé, metadados por foto
+3. **🏗️ Navegação de Projetos**: Sistema de multi-obras com toggle
+4. **☁️ Cloudflare Tunnel**: Acesso externo via URL pública ([Guia](./CLOUDFLARE-TUNNEL-SETUP.md))
 
 ## Arquitetura
 
