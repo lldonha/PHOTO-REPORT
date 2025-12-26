@@ -121,3 +121,95 @@ Ou para execucao manual:
   pytest tests/ -v
 
 === END SESSION 1 (PLANNER - SPEC 004) ===
+
+================================================================================
+================================================================================
+
+=== SPEC 005 - UPLOAD VALIDATION AND PROGRESS FEEDBACK ===
+
+Project: PHOTO-REPORT - Upload Validation and Progress Feedback
+Started: 2025-12-26 (Planner Session for Spec 005)
+
+Workflow Type: feature
+Rationale: Frontend-only UX enhancement adding progress bar, validation, and error states
+           to existing upload interface. No backend changes required.
+
+Session 1 (Planner - Spec 005):
+- Created implementation_plan.json
+- Phases: 6
+- Total subtasks: 16
+- Reused existing init.sh
+
+Phase Summary:
+1. [phase-1-validation] Client-Side Validation: 2 subtasks, no dependencies
+   - validateFile() function for type/size checking
+   - Integration with processarArquivos()
+
+2. [phase-2-progress-bar] Visual Progress Bar: 3 subtasks, no dependencies
+   - HTML elements for progress bar
+   - CSS styling with animations
+   - updateProgress() function
+
+3. [phase-3-error-states] Error State Handling: 4 subtasks, depends on Phase 1, 2
+   - Extended state object with status tracking
+   - .foto-card-error CSS class
+   - renderFotoCard() error state rendering
+   - Error handling in processarArquivos()
+
+4. [phase-4-time-estimation] Time Estimation: 3 subtasks, depends on Phase 2
+   - Time tracking in state
+   - HTML element for time display
+   - calcularTempoEstimado() function
+
+5. [phase-5-cancel-button] Cancel Processing: 2 subtasks, depends on Phase 3
+   - Cancel button in loading overlay
+   - Cancel logic with state.cancelado flag
+
+6. [phase-6-integration] Integration and Polish: 4 subtasks, depends on Phase 3, 4, 5
+   - Status bar error count
+   - removerFoto() error handling
+   - Full E2E testing
+   - Mobile responsiveness verification
+
+Services Involved:
+- frontend: Primary service - HTML/JS/CSS enhancements
+
+Key File:
+- .worktrees/001-criar-sistema-photo-report-completo/src/frontend/index.html
+
+Parallelism Analysis:
+- Max parallel phases: 2 (Phase 1 and Phase 2 can run in parallel)
+- Recommended workers: 1 (single file, sequential is cleaner)
+- Parallel groups: [phase-1-validation, phase-2-progress-bar]
+
+Existing Patterns to Follow:
+- CSS Variables: :root with --error-color, --success-color, etc.
+- Toast Notifications: showToast(message, type)
+- Loading Overlay: setLoading(show, text, progress)
+- State Management: global state object with fotos array
+
+Risk Level: LOW
+- Frontend-only changes
+- No security implications
+- Manual browser testing sufficient
+
+=== STARTUP COMMAND (SPEC 005) ===
+
+To continue building this spec, run:
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 005 --parallel 1
+
+To start the development environment manually:
+
+  # Terminal 1: Start Backend API (Docker)
+  docker-compose up -d
+
+  # Terminal 2: Serve Frontend
+  python -m http.server 8080 --directory .worktrees/001-criar-sistema-photo-report-completo/src/frontend/
+
+  # Access:
+  # - Frontend: http://localhost:8080
+  # - API: http://localhost:8002
+  # - API Docs: http://localhost:8002/docs
+
+=== END SESSION 1 (PLANNER - SPEC 005) ===
