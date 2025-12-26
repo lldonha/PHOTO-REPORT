@@ -3,23 +3,23 @@
   "spec": "001-criar-sistema-photo-report-completo",
   "state": "building",
   "subtasks": {
-    "completed": 10,
+    "completed": 13,
     "total": 21,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Frontend - Interface HTML",
+    "current": "Documentation - Skills e Context",
     "id": null,
-    "total": 1
+    "total": 3
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 10,
+    "number": 13,
     "started_at": "2025-12-25T20:19:59.015497"
   },
-  "last_update": "2025-12-25T20:40:47.073312"
+  "last_update": "2025-12-25T20:51:25.802116"
 }
