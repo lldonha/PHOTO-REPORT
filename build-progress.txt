@@ -279,3 +279,152 @@ To start the development environment manually:
   # - API Docs: http://localhost:8002/docs
 
 === END SESSION 1 (PLANNER - SPEC 010) ===
+
+================================================================================
+================================================================================
+
+=== SPEC 007 - AI-POWERED CAPTION GENERATION ===
+
+Project: PHOTO-REPORT - AI-Powered Caption Generation
+Started: 2025-12-26 (Planner Session for Spec 007)
+
+Workflow Type: feature
+Rationale: New feature adding AI caption generation capability to existing photo
+           processing system. Uses Claude Vision API to generate construction-
+           appropriate captions. Requires backend service, API endpoints, and
+           frontend UI integration. Multi-service feature with clear dependency
+           order: backend first, then frontend.
+
+## Investigation Summary
+
+### Codebase Analysis:
+- Main photo processing in worktree-001: processor.py, exif_extractor.py, etc.
+- FastAPI with Pydantic BaseModel for request/response validation
+- Module-level logger with consistent format
+- Portuguese docstrings and error messages
+- Docker support for deployment
+
+### Existing Patterns Found:
+1. **API Endpoints**: FastAPI with Pydantic models, async handlers, HTTPException
+2. **Service Modules**: Separate files (exif_extractor.py, overlay_generator.py)
+3. **Frontend**: State object, showToast(), setLoading(), CSS variables, template literals
+4. **Docker**: docker-compose.yml with environment variables, Dockerfile with dependencies
+
+### Pattern Files to Reference:
+- src/python/processor.py - FastAPI endpoint patterns
+- src/python/exif_extractor.py - Service class pattern
+- src/frontend/index.html - Frontend JavaScript patterns
+- src/docker/docker-compose.yml - Docker configuration
+
+Session 1 (Planner - Spec 007):
+- Created implementation_plan.json
+- Phases: 6
+- Total subtasks: 14
+- Created init.sh for spec
+- Updated project_index.json
+- Updated context.json
+
+Phase Summary:
+1. [phase-1-backend-service] Backend Caption Service: 3 subtasks, depends on []
+   - Create caption_prompts.py with construction-specific prompts
+   - Create caption_service.py with CaptionService class for Claude Vision
+   - Update requirements.txt with anthropic SDK dependency
+
+2. [phase-2-backend-api] Backend API Endpoints: 3 subtasks, depends on [phase-1]
+   - Add Pydantic models for caption request/response
+   - Add /gerar-legenda POST endpoint for single photo
+   - Add /gerar-legendas-lote POST endpoint for batch processing
+
+3. [phase-3-docker-config] Docker Configuration: 1 subtask, depends on [phase-1]
+   - Update docker-compose.yml with ANTHROPIC_API_KEY environment variable
+
+4. [phase-4-frontend-ui] Frontend Caption UI: 6 subtasks, depends on [phase-2]
+   - Add CSS styles for AI caption UI components
+   - Add state tracking for AI captions (legendaIA, legendaStatus)
+   - Add AI caption button to each photo card
+   - Add caption suggestion UI with accept/edit/reject buttons
+   - Add gerarLegendaIA() function to call backend API
+   - Add batch caption generation button and gerarTodasLegendas()
+
+5. [phase-5-testing] Unit and Integration Tests: 2 subtasks, depends on [phase-2]
+   - Create test_caption_service.py with unit tests
+   - Create test_caption_api.py with integration tests
+
+6. [phase-6-integration] Integration and E2E Verification: 2 subtasks, depends on [phase-4, phase-5]
+   - E2E: Upload photo, generate caption, accept, verify in PDF
+   - Verify batch caption generation for multiple photos
+
+Services Involved:
+- backend (primary): CaptionService + new /gerar-legenda endpoints
+- frontend (primary): AI caption UI with accept/edit/reject workflow
+- external (integration): Claude Vision API (Anthropic)
+
+Files to Create (4):
+- src/python/caption_prompts.py - Construction-specific AI prompts
+- src/python/caption_service.py - CaptionService class
+- tests/test_caption_service.py - Unit tests for CaptionService
+- tests/test_caption_api.py - Integration tests for API endpoints
+
+Files to Modify (4):
+- src/python/processor.py - Add /gerar-legenda endpoints
+- src/python/requirements.txt - Add anthropic SDK
+- src/docker/docker-compose.yml - Add ANTHROPIC_API_KEY env
+- src/frontend/index.html - Add AI caption UI
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 1 (sequential recommended for first AI integration)
+- Parallel groups:
+  * [phase-3-docker-config, phase-5-testing] - Different services/files
+
+Risk Level: MEDIUM
+- External API integration (rate limits, latency, costs)
+- 5 second response time target may be challenging for large images
+- Cost tracking required per photo
+
+Verification Strategy:
+- Unit tests for caption service logic (mocked API)
+- Integration tests for API endpoints
+- Security scan for API key exposure
+- Browser testing for frontend components
+
+Success Criteria:
+- [ ] AI generates captions within 5 seconds per photo
+- [ ] Captions are limited to 80 characters
+- [ ] Captions use construction-appropriate terminology in Portuguese
+- [ ] Users can accept, edit, or reject AI suggestions
+- [ ] Batch processing works for all photos
+- [ ] Cost per photo is logged to console
+- [ ] No console errors during operation
+- [ ] Existing photo processing functionality still works
+- [ ] No API keys exposed in code
+
+=== STARTUP COMMAND (SPEC 007) ===
+
+To continue building this spec, run:
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 007 --parallel 1
+
+To start the development environment manually:
+
+  # 1. Set API key
+  export ANTHROPIC_API_KEY=your-key-here
+
+  # 2. Navigate to worktree
+  cd .worktrees/007-ai-powered-caption-generation
+
+  # 3. Install dependencies
+  pip install -r src/python/requirements.txt
+
+  # 4. Start Backend API
+  cd src/python && uvicorn processor:app --reload --port 8002
+
+  # 5. Serve Frontend (new terminal)
+  python -m http.server 8080 -d src/frontend
+
+  # Access:
+  # - Frontend: http://localhost:8080
+  # - API: http://localhost:8002
+  # - API Docs: http://localhost:8002/docs
+
+=== END SESSION 1 (PLANNER - SPEC 007) ===
