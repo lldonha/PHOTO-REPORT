@@ -1,6 +1,10 @@
-# Verification Instructions for subtask-9-1
+# Verification Instructions
 
-## Subtask: Verificar endpoint /processar-foto com uma foto de teste
+This document contains verification instructions for the PHOTO-REPORT integration tests.
+
+---
+
+# subtask-9-1: Verificar endpoint /processar-foto com uma foto de teste
 
 ### Prerequisites
 
@@ -124,3 +128,130 @@ The verification is **PASSED** when:
 2. Response JSON contains `"sucesso": true`
 3. Response contains valid `metadados` structure
 4. Response contains non-empty `imagem_base64`
+
+---
+
+# subtask-9-2: Verificar frontend abre corretamente no navegador
+
+## Description
+
+Verify that the frontend HTML file opens correctly in the browser with all UI elements visible and no JavaScript console errors.
+
+## Prerequisites
+
+1. Browser (Chrome, Firefox, Edge, or Safari)
+2. Frontend file exists at `src/frontend/index.html`
+
+## How to Verify
+
+### Option A: Using verification script (Windows)
+```cmd
+scripts\tests\verify-frontend.bat
+```
+
+### Option B: Using verification script (Linux/Mac)
+```bash
+chmod +x scripts/tests/verify-frontend.sh
+./scripts/tests/verify-frontend.sh
+```
+
+### Option C: Manual verification
+1. Open `src/frontend/index.html` directly in your browser
+2. Follow the verification checklist below
+
+## Verification Checklist
+
+### 1. Page Loads Successfully
+- [ ] Page opens without 404 or loading errors
+- [ ] Header shows "PHOTO-REPORT" with camera emoji
+- [ ] Subtitle shows "Gerador de Relatorios Fotograficos de Obra"
+
+### 2. Dropzone is Visible
+- [ ] Large drag-and-drop area with dashed border
+- [ ] Camera emoji icon (large)
+- [ ] Text: "Arraste as fotos aqui"
+- [ ] Text: "ou clique para selecionar arquivos (JPEG, PNG)"
+- [ ] Text: "Maximo 100 fotos por relatorio"
+
+### 3. Configuration Fields Visible
+- [ ] **Titulo do Relatorio** input field
+  - Has default value "Relatorio Fotografico"
+- [ ] **Nome da Obra** input field
+  - Has placeholder text
+- [ ] **Responsavel Tecnico** input field
+  - Has placeholder text
+
+### 4. Status Bar Visible
+- [ ] Badge showing "Pronto" (green)
+- [ ] Counter showing "0 fotos carregadas"
+- [ ] "Limpar Tudo" button (disabled, grayed out)
+- [ ] "Gerar Relatorio PDF" button (disabled, grayed out)
+
+### 5. Empty State Visible
+- [ ] Camera icon (grayed out)
+- [ ] Text: "Nenhuma foto carregada ainda"
+- [ ] Text: "Arraste fotos para a area acima ou clique para selecionar"
+
+### 6. No Console Errors
+- [ ] Open Developer Tools (F12)
+- [ ] Click on "Console" tab
+- [ ] **NO RED ERROR MESSAGES**
+- [ ] Note: A warning about API connection is acceptable if Docker is not running:
+      "API nao esta disponivel. Inicie o container Docker."
+
+## Expected DOM Elements
+
+The following elements must exist and be visible:
+
+| Element ID | Type | Description |
+|------------|------|-------------|
+| `dropzone` | div | Drag-and-drop area |
+| `fileInput` | input[file] | Hidden file input |
+| `titulo` | input[text] | Report title field |
+| `obra` | input[text] | Construction site name |
+| `responsavel` | input[text] | Technical responsible |
+| `statusBadge` | span | Status indicator badge |
+| `fotoCount` | span | Photo counter |
+| `btnLimpar` | button | Clear all button |
+| `btnGerarPdf` | button | Generate PDF button |
+| `fotoGrid` | div | Grid for photo cards |
+| `emptyState` | div | Empty state message |
+
+## JavaScript Console Check
+
+Open the browser console (F12 > Console) and verify:
+
+1. **No syntax errors** - JavaScript loads without errors
+2. **No undefined references** - All elements are found
+3. **API check** - You may see a toast notification about API status:
+   - If Docker is running: "Conectado a API PHOTO-REPORT!"
+   - If Docker is not running: "API nao esta disponivel..."
+
+This is expected behavior and NOT an error.
+
+## Success Criteria
+
+The verification is **PASSED** when:
+1. Page loads completely without errors
+2. All UI elements from the checklist are visible
+3. Browser console shows NO RED ERROR MESSAGES
+4. Configuration fields are editable
+5. Dropzone responds to hover (border color changes)
+
+## Troubleshooting
+
+**Page is blank:**
+- Check if index.html exists in src/frontend/
+- Verify the file is not corrupted (open in text editor)
+
+**JavaScript errors in console:**
+- Check for typos in element IDs
+- Ensure all script sections are properly closed
+
+**Styles not loading:**
+- All styles are inline in the HTML file
+- If styles are missing, the file may be truncated
+
+**Elements missing:**
+- Verify the HTML structure is complete
+- Check that the file wasn't partially saved
