@@ -93,3 +93,16 @@ subtask-7-1: Criar rede Docker coletor_default
 - User Action Required: Execute manualmente:
   Windows: scripts\docker\setup-network.bat
   Linux/Mac: chmod +x scripts/docker/setup-network.sh && ./scripts/docker/setup-network.sh
+
+subtask-7-2: Build do container Docker photo-processor
+- Status: COMPLETED
+- Changes Made:
+  * Fixed Dockerfile COPY paths (python/ instead of ../python/)
+  * Paths now relative to build context (src/) as defined in docker-compose.yml
+  * Created build scripts for automation:
+    - scripts/docker/build-container.bat (Windows)
+    - scripts/docker/build-container.sh (Linux/Mac)
+- User Action Required: Execute manualmente:
+  Windows: scripts\docker\build-container.bat
+  Linux/Mac: chmod +x scripts/docker/build-container.sh && ./scripts/docker/build-container.sh
+- Verification: cd src\docker && docker-compose build

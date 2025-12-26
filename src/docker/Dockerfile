@@ -46,13 +46,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean
 
 # Copiar requirements primeiro (cache de camadas Docker)
-COPY ../python/requirements.txt .
+# Nota: context é o diretório pai (src/), então paths são relativos a src/
+COPY python/requirements.txt .
 
 # Instalar dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código da aplicação
-COPY ../python/ .
+COPY python/ .
 
 # Criar diretório para arquivos temporários
 RUN mkdir -p /tmp/photo-processor
