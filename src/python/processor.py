@@ -20,10 +20,11 @@ import base64
 from typing import Optional, List
 from io import BytesIO
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Módulos locais
 from exif_extractor import extrair_exif, formatar_data_hora
@@ -47,13 +48,37 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configuração de CORS para permitir acesso do frontend
+# Middleware customizado para adicionar cabeçalhos CORS
+class CORSHeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Handle preflight requests
+        if request.method == "OPTIONS":
+            response = Response(status_code=200)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+            response.headers["Access-Control-Max-Age"] = "3600"
+            return response
+
+        # Process normal requests
+        response = await call_next(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+
+# Adicionar o middleware customizado
+app.add_middleware(CORSHeaderMiddleware)
+
+# Configuração de CORS para permitir acesso do frontend (backup)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Em produção, especificar domínios permitidos
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,  # Não pode ser True com allow_origins=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 
