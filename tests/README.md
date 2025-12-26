@@ -2,12 +2,33 @@
 
 This directory contains test scripts and resources for verifying the PHOTO-REPORT API.
 
-## Quick Verification
+## Quick Start
 
-### Verify /processar-foto endpoint
+### Run End-to-End Test (Recommended)
+
+The E2E test verifies the complete flow: upload -> EXIF extraction -> overlay -> PDF generation.
 
 **Windows:**
+```cmd
+scripts\tests\run-e2e-test.bat
+```
+
+**Linux/Mac:**
 ```bash
+chmod +x scripts/tests/run-e2e-test.sh
+./scripts/tests/run-e2e-test.sh
+```
+
+**Using Python directly:**
+```bash
+pip install requests pillow
+python tests/test_e2e_complete_flow.py
+```
+
+### Verify /processar-foto endpoint only
+
+**Windows:**
+```cmd
 scripts\tests\verify-processar-foto.bat
 ```
 
@@ -34,9 +55,12 @@ curl -X POST http://localhost:8002/processar-foto \
 
 | Script | Description |
 |--------|-------------|
+| `test_e2e_complete_flow.py` | **Complete E2E test** - Upload -> EXIF -> Overlay -> PDF |
 | `test_processar_foto.py` | Python test for /processar-foto endpoint |
-| `scripts/tests/verify-processar-foto.bat` | Windows batch script |
-| `scripts/tests/verify-processar-foto.sh` | Linux/Mac shell script |
+| `scripts/tests/run-e2e-test.bat` | Windows batch script for E2E test |
+| `scripts/tests/run-e2e-test.sh` | Linux/Mac shell script for E2E test |
+| `scripts/tests/verify-processar-foto.bat` | Windows batch script for endpoint test |
+| `scripts/tests/verify-processar-foto.sh` | Linux/Mac shell script for endpoint test |
 
 ## Testing with Real Photos
 
@@ -73,8 +97,32 @@ curl -X POST -F "file=@tests/my-photo.jpg" http://localhost:8002/processar-foto 
 }
 ```
 
+## E2E Test Output Files
+
+After running the E2E test, these files are generated:
+
+| File | Description |
+|------|-------------|
+| `e2e_test_output.pdf` | PDF generated via /gerar-pdf endpoint |
+| `e2e_download_test.pdf` | PDF from /gerar-pdf/download endpoint |
+
+## E2E Test Flow
+
+The complete E2E test performs these steps:
+
+1. **Health Check** - Verifies API is running at localhost:8002
+2. **Process Photo** - Uploads test image, extracts EXIF metadata
+3. **Apply Overlay** - Adds legend and metadata bar to image
+4. **Generate PDF** - Creates PDF report with multiple photos
+5. **PDF Download** - Tests direct download endpoint
+
 ## Prerequisites
 
 - Docker container `photo-processor` must be running
 - Start with: `cd src/docker && docker-compose up -d`
 - Verify with: `curl http://localhost:8002/health`
+
+## Full Documentation
+
+For complete verification instructions including manual browser testing, see:
+`scripts/tests/VERIFICATION_INSTRUCTIONS.md`

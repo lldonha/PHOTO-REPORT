@@ -255,3 +255,230 @@ The verification is **PASSED** when:
 **Elements missing:**
 - Verify the HTML structure is complete
 - Check that the file wasn't partially saved
+
+---
+
+# subtask-9-3: Teste End-to-End - Upload de Foto -> EXIF -> Overlay -> PDF
+
+## Description
+
+Complete end-to-end test verifying the full workflow from photo upload through PDF generation.
+
+## Prerequisites
+
+1. Docker must be running
+2. Container photo-processor must be started
+3. Python 3.8+ with requests and Pillow libraries
+
+## Automated E2E Test
+
+### Option A: Using Python test script (Recommended)
+
+```bash
+# Install dependencies
+pip install requests Pillow
+
+# Run E2E test
+python tests/test_e2e_complete_flow.py
+```
+
+### Option B: Using Windows batch script
+
+```cmd
+scripts\tests\run-e2e-test.bat
+```
+
+### Option C: Using shell script (Linux/Mac)
+
+```bash
+chmod +x scripts/tests/run-e2e-test.sh
+./scripts/tests/run-e2e-test.sh
+```
+
+## What the E2E Test Verifies
+
+The automated test performs these steps:
+
+1. **Health Check** - Verifies API is running
+2. **Process Photo** - Uploads test image, extracts EXIF metadata
+3. **Apply Overlay** - Adds legend and metadata bar to image
+4. **Generate PDF** - Creates PDF report with multiple photos
+5. **PDF Download** - Tests direct download endpoint
+
+## Manual Browser E2E Test
+
+For a complete manual verification through the browser:
+
+### Step 1: Start Container
+
+```bash
+cd src/docker
+docker-compose up -d
+```
+
+### Step 2: Verify Container
+
+```bash
+curl http://localhost:8002/health
+```
+
+Expected: `{"status":"ok","version":"1.0.0","service":"photo-processor"}`
+
+### Step 3: Open Frontend
+
+Open `src/frontend/index.html` in your browser.
+
+### Step 4: Prepare Test Photo
+
+Use a photo with GPS metadata for best results:
+- Photos from smartphones typically have GPS
+- You can use any JPEG image for basic testing
+
+### Step 5: Upload Photo
+
+1. Drag the photo to the dropzone area OR click to select file
+2. Wait for processing (loading spinner)
+3. Verify the photo card appears in the grid
+
+### Step 6: Verify EXIF Extraction
+
+Check the photo card displays:
+- [ ] Thumbnail image
+- [ ] Date/time (or "-" if no EXIF)
+- [ ] GPS coordinates (or "-" if no GPS)
+- [ ] Compass direction (or "-" if no direction)
+- [ ] Mini-map (only if GPS data exists)
+
+### Step 7: Edit Legend
+
+1. Find the legend textarea below the photo
+2. Type a test legend (max 80 characters)
+3. Verify character counter updates
+4. Example: "Vista frontal da entrada principal do canteiro"
+
+### Step 8: Configure Report
+
+Fill in the configuration fields:
+- **Titulo:** "Relatorio Fotografico de Teste"
+- **Obra:** "Edificio Residencial Alpha"
+- **Responsavel:** "Eng. Teste - CREA 123456"
+
+### Step 9: Generate PDF
+
+1. Click the "Gerar Relatorio PDF" button
+2. Wait for processing (loading overlay shows progress)
+3. PDF should automatically download
+
+### Step 10: Verify PDF
+
+Open the downloaded PDF and verify:
+- [ ] PDF opens correctly
+- [ ] Header shows title, obra, responsavel, date
+- [ ] Photo appears in the grid
+- [ ] Overlay bar at bottom of photo with:
+  - Date/time
+  - GPS coordinates
+  - Compass direction
+  - Legend (in yellow)
+- [ ] Page number in footer
+
+## Verification Checklist
+
+### API Endpoints
+
+- [ ] GET /health returns 200 with status "ok"
+- [ ] POST /processar-foto accepts file upload, returns metadata
+- [ ] POST /aplicar-mascara applies overlay, returns image
+- [ ] POST /gerar-pdf generates PDF, returns base64
+- [ ] POST /gerar-pdf/download returns PDF file directly
+
+### Frontend Functionality
+
+- [ ] Dropzone accepts drag-and-drop files
+- [ ] Dropzone accepts click-to-select files
+- [ ] Multiple files can be uploaded (up to 100)
+- [ ] Photo cards display correctly with metadata
+- [ ] Legend textarea accepts input (max 80 chars)
+- [ ] Remove button (X) removes individual photos
+- [ ] Clear All button removes all photos
+- [ ] Generate PDF button creates downloadable PDF
+- [ ] Toast notifications show success/error messages
+- [ ] Loading overlay shows during processing
+- [ ] Preview modal opens on photo click
+
+### PDF Content
+
+- [ ] PDF is valid and opens in PDF viewers
+- [ ] Header contains report title
+- [ ] Header contains obra name
+- [ ] Header contains responsavel name
+- [ ] Header contains generation date
+- [ ] Photos displayed in 2x3 grid (6 per page)
+- [ ] Photo overlay shows date/GPS/direction/legend
+- [ ] Pages are numbered
+- [ ] Multiple pages work correctly (for >6 photos)
+
+## Expected Output Files
+
+After running the E2E test, these files are generated:
+
+| File | Description |
+|------|-------------|
+| `tests/e2e_test_output.pdf` | PDF generated via /gerar-pdf endpoint |
+| `tests/e2e_download_test.pdf` | PDF from /gerar-pdf/download endpoint |
+
+## Troubleshooting
+
+### Container not running
+
+```bash
+# Check if container exists
+docker ps -a | grep photo-processor
+
+# Start container
+cd src/docker && docker-compose up -d
+
+# Check logs
+docker logs photo-processor
+```
+
+### API returns 500 error
+
+```bash
+# Check container logs for error details
+docker logs photo-processor --tail 50
+```
+
+### PDF generation fails
+
+- Ensure WeasyPrint dependencies are installed in container
+- Check for valid base64 image data
+- Verify Jinja2 template is correct
+
+### Frontend API connection fails
+
+- Container must be running on port 8002
+- Check CORS settings in API
+- Open browser console for detailed errors
+
+## Success Criteria
+
+The E2E test is **PASSED** when:
+
+1. All 5 automated test steps pass
+2. Generated PDFs are valid and contain correct content
+3. OR: Manual browser test completes all steps successfully
+4. PDF downloads correctly with proper overlay and layout
+
+## Test with Real Photo
+
+For the most comprehensive test, use a photo with full EXIF data:
+
+```bash
+# Test with a real photo that has GPS
+curl -X POST http://localhost:8002/processar-foto \
+  -F "file=@your-photo-with-gps.jpg" \
+  | python -m json.tool
+```
+
+This will show actual GPS coordinates, date/time, and compass direction in the metadata.
