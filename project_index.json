@@ -1,14 +1,21 @@
 {
   "project_type": "single",
   "services": {
-    "main": {
+    "backend": {
       "path": ".",
-      "tech_stack": ["python", "fastapi", "pydantic"],
+      "tech_stack": ["python", "fastapi", "pydantic", "sqlalchemy", "alembic"],
       "port": 8000,
       "external_port": 8002,
       "dev_command": "uvicorn src.main:app --reload --host 0.0.0.0 --port 8000",
-      "test_command": "pytest tests/",
+      "test_command": "pytest tests/ -v",
       "entry_point": "src/main.py"
+    },
+    "frontend": {
+      "path": "src/frontend",
+      "tech_stack": ["html", "css", "javascript"],
+      "port": 8080,
+      "dev_command": "python -m http.server 8080 -d src/frontend",
+      "type": "static"
     },
     "postgresql": {
       "path": ".",
@@ -37,8 +44,11 @@
     "models": "src/models",
     "schemas": "src/schemas",
     "services": "src/services",
+    "repositories": "src/repositories",
     "api": "src/api",
     "core": "src/core",
+    "migrations": "alembic/versions",
+    "frontend": "src/frontend",
     "uploads": "uploads"
   }
 }

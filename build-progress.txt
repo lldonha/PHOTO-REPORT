@@ -125,201 +125,143 @@ Ou para execucao manual:
 ================================================================================
 ================================================================================
 
-=== SPEC 005 - UPLOAD VALIDATION AND PROGRESS FEEDBACK ===
+=== SPEC 010 - MULTI-PROJECT (OBRA) MANAGEMENT ===
 
-Project: PHOTO-REPORT - Upload Validation and Progress Feedback
-Started: 2025-12-26 (Planner Session for Spec 005)
-
-Workflow Type: feature
-Rationale: Frontend-only UX enhancement adding progress bar, validation, and error states
-           to existing upload interface. No backend changes required.
-
-Session 1 (Planner - Spec 005):
-- Created implementation_plan.json
-- Phases: 6
-- Total subtasks: 16
-- Reused existing init.sh
-
-Phase Summary:
-1. [phase-1-validation] Client-Side Validation: 2 subtasks, no dependencies
-   - validateFile() function for type/size checking
-   - Integration with processarArquivos()
-
-2. [phase-2-progress-bar] Visual Progress Bar: 3 subtasks, no dependencies
-   - HTML elements for progress bar
-   - CSS styling with animations
-   - updateProgress() function
-
-3. [phase-3-error-states] Error State Handling: 4 subtasks, depends on Phase 1, 2
-   - Extended state object with status tracking
-   - .foto-card-error CSS class
-   - renderFotoCard() error state rendering
-   - Error handling in processarArquivos()
-
-4. [phase-4-time-estimation] Time Estimation: 3 subtasks, depends on Phase 2
-   - Time tracking in state
-   - HTML element for time display
-   - calcularTempoEstimado() function
-
-5. [phase-5-cancel-button] Cancel Processing: 2 subtasks, depends on Phase 3
-   - Cancel button in loading overlay
-   - Cancel logic with state.cancelado flag
-
-6. [phase-6-integration] Integration and Polish: 4 subtasks, depends on Phase 3, 4, 5
-   - Status bar error count
-   - removerFoto() error handling
-   - Full E2E testing
-   - Mobile responsiveness verification
-
-Services Involved:
-- frontend: Primary service - HTML/JS/CSS enhancements
-
-Key File:
-- .worktrees/001-criar-sistema-photo-report-completo/src/frontend/index.html
-
-Parallelism Analysis:
-- Max parallel phases: 2 (Phase 1 and Phase 2 can run in parallel)
-- Recommended workers: 1 (single file, sequential is cleaner)
-- Parallel groups: [phase-1-validation, phase-2-progress-bar]
-
-Existing Patterns to Follow:
-- CSS Variables: :root with --error-color, --success-color, etc.
-- Toast Notifications: showToast(message, type)
-- Loading Overlay: setLoading(show, text, progress)
-- State Management: global state object with fotos array
-
-Risk Level: LOW
-- Frontend-only changes
-- No security implications
-- Manual browser testing sufficient
-
-=== STARTUP COMMAND (SPEC 005) ===
-
-To continue building this spec, run:
-
-  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 005 --parallel 1
-
-To start the development environment manually:
-
-  # Terminal 1: Start Backend API (Docker)
-  docker-compose up -d
-
-  # Terminal 2: Serve Frontend
-  python -m http.server 8080 --directory .worktrees/001-criar-sistema-photo-report-completo/src/frontend/
-
-  # Access:
-  # - Frontend: http://localhost:8080
-  # - API: http://localhost:8002
-  # - API Docs: http://localhost:8002/docs
-
-=== END SESSION 1 (PLANNER - SPEC 005) ===
-
-================================================================================
-================================================================================
-
-=== SPEC 006 - CACHE DE MINI MAPAS OSM ===
-
-Project: PHOTO-REPORT - Cache de Mini Mapas OSM
-Started: 2025-12-26 (Planner Session for Spec 006)
+Project: PHOTO-REPORT - Multi-Project (Obra) Management
+Started: 2025-12-26 (Planner Session for Spec 010)
 
 Workflow Type: feature
-Rationale: Novo recurso que adiciona funcionalidade de cache ao serviço de mapas
-           existente. Envolve criação de novo módulo de cache, modificação do
-           MapService para usar o cache, e novas configurações de ambiente.
+Rationale: This is a significant new feature that introduces a new domain entity
+           (Obra/Project), requires database schema changes, API endpoints, and
+           frontend UI components. It follows the feature workflow with backend
+           first, then frontend, then integration phases.
 
 ## Investigation Summary
 
-### py-staticmaps Library Analysis:
-- TileDownloader class already has basic caching to disk
-- Cache files stored at: {cache_dir}/{provider_name}/{z}/{x}/{y}.png
-- Context.set_cache_dir() and Context.set_tile_downloader() provide hooks
-- **LACKS**: TTL expiration, LRU eviction, size limits, offline fallback
+### Codebase Analysis:
+- Main project uses FastAPI with Pydantic v2 for validation
+- SQLAlchemy 2.0 with async support (found in worktree-004)
+- Alembic for database migrations
+- Repository pattern for data access
+- Frontend uses vanilla HTML/CSS/JavaScript with state management
 
-### Implementation Approach:
-- Create CachedTileDownloader extending staticmaps.TileDownloader
-- Override get() method to add TTL checking before returning cached tiles
-- Implement cleanup() for expired tiles removal
-- Implement evict_lru() for size-based eviction
-- Use threading.Lock for thread-safety
-- Follow singleton pattern with get_tile_cache_service()
+### Existing Patterns Found:
+1. **SQLAlchemy 2.0 Models**: Use Mapped[], mapped_column(), UUID PKs, TimestampMixin
+2. **Pydantic Schemas**: Base, Create, Update, Response pattern with Field() validations
+3. **Repository Pattern**: Class with AsyncSession, CRUD methods, logging
+4. **API Endpoints**: APIRouter with prefix/tags, Depends(get_async_session)
+5. **Frontend**: CSS variables, state object, template literals, toast notifications
 
-Session 1 (Planner - Spec 006):
+### Pattern Files to Reference:
+- src/models/photo_report.py - SQLAlchemy model pattern
+- src/schemas/photo_report.py - Pydantic schema pattern
+- src/repositories/photo_report_repository.py - Repository pattern
+- src/api/v1/endpoints/reports.py - API endpoint pattern
+- src/frontend/index.html - Frontend UI pattern
+
+Session 1 (Planner - Spec 010):
 - Created implementation_plan.json
-- Phases: 5
-- Total subtasks: 6
-- Updated context.json with investigation findings
-- Reused existing init.sh
+- Phases: 6
+- Total subtasks: 10
+- Updated project_index.json
+- Updated context.json
 
 Phase Summary:
-1. [phase-1-config] Configurações de Cache: 2 subtasks, no dependencies
-   - Adicionar CACHE_DIR, CACHE_MAX_SIZE_MB, CACHE_TTL_DAYS ao Settings
-   - Adicionar variáveis de ambiente ao .env.example
+1. [phase-1-backend-model] Backend Model & Repository: 3 subtasks, depends on []
+   - Create Obra SQLAlchemy model (id, nome, endereco, cliente, status, timestamps)
+   - Create Obra Pydantic schemas (Create, Update, Response, ListResponse)
+   - Create ObraRepository with CRUD operations and status filter
 
-2. [phase-2-cache-service] Serviço de Cache de Tiles: 1 subtask, depends on Phase 1
-   - Criar TileCacheService com CachedTileDownloader
-   - TTL check, LRU eviction, fallback offline
+2. [phase-2-database-migration] Database Migration: 1 subtask, depends on [phase-1]
+   - Create Alembic migration for obras table
+   - Add obra_id FK to photo_reports (nullable for backwards compatibility)
+   - Create indexes on status and nome
 
-3. [phase-3-integration] Integração com MapService: 1 subtask, depends on Phase 2
-   - Modificar MapService para usar CachedTileDownloader
-   - Usar context.set_tile_downloader() e context.set_cache_dir()
+3. [phase-3-backend-api] Backend API Endpoints: 2 subtasks, depends on [phase-1]
+   - Create Obras API router with CRUD endpoints
+   - Register router in main.py
 
-4. [phase-4-tests] Testes Unitários e Integração: 2 subtasks, depends on Phase 3
-   - Criar testes unitários para TileCacheService
-   - Verificar regressão em testes existentes do MapService
+4. [phase-4-backend-tests] Backend Unit Tests: 1 subtask, depends on [phase-3]
+   - Create unit tests for ObraRepository CRUD operations
 
-5. [phase-5-verification] Verificação Final: 1 subtask, depends on Phase 4
-   - Verificação end-to-end do cache
+5. [phase-5-frontend-ui] Frontend UI Components: 3 subtasks, depends on [phase-3]
+   - Add project selector dropdown above dropzone
+   - Add project creation/management modal
+   - Update report generation to include selected obra
+
+6. [phase-6-integration] Integration & E2E Verification: 2 subtasks, depends on [phase-4, phase-5]
+   - Integration test: Create obra, select, upload, generate PDF
+   - Database state verification
 
 Services Involved:
-- main (primary): Backend FastAPI com MapService a ser modificado
+- backend (primary): FastAPI with new Obra model, repository, and endpoints
+- frontend (primary): Project selector UI and management modal
+- postgresql (integration): Database with obras table and FK to photo_reports
 
-Files to Create (2):
-- src/services/tile_cache_service.py - Serviço de cache com CachedTileDownloader
-- tests/test_tile_cache_service.py - Testes unitários
+Files to Create (6):
+- src/models/obra.py - Obra SQLAlchemy model
+- src/schemas/obra.py - Obra Pydantic schemas
+- src/repositories/obra_repository.py - ObraRepository CRUD
+- src/api/v1/endpoints/obras.py - Obras API router
+- alembic/versions/002_add_obras.py - Database migration
+- tests/test_obras.py - Unit tests
 
-Files to Modify (3):
-- src/core/config.py - Adicionar configurações de cache
-- src/services/map_service.py - Integrar com TileCacheService
-- .env.example - Adicionar variáveis de cache
+Files to Modify (4):
+- src/models/__init__.py - Export Obra model
+- src/schemas/__init__.py - Export Obra schemas
+- src/main.py - Register obras router
+- src/frontend/index.html - Add obra selector and modal
 
 Parallelism Analysis:
-- Max parallel phases: 1
-- Recommended workers: 1 (sequential - phases have dependencies)
-- Parallel groups: None (strict linear dependency chain)
+- Max parallel phases: 2
+- Recommended workers: 1 (sequential due to database dependencies)
+- Parallel groups:
+  * [phase-2-database-migration, phase-3-backend-api] - Both depend on phase-1
+  * [phase-4-backend-tests, phase-5-frontend-ui] - Both depend on phase-3
 
-Risk Level: LOW
-- Additive feature with fallback to existing behavior
-- Standard disk caching patterns
-- No security implications
+Risk Level: MEDIUM
+- Database schema changes with FK modifications
+- Migration strategy for existing data required
+- Nullable obra_id initially for backwards compatibility
 
 Verification Strategy:
-- Unit tests for cache logic (hit/miss/expiry/cleanup/LRU)
-- Integration tests for MapService with caching
-- Regression tests for existing MapService functionality
+- Unit tests for repository logic
+- API endpoint verification via curl
+- Browser testing for frontend components
+- Database state verification
 
 Success Criteria:
-- [ ] Tiles são cacheados em disco por 7 dias (configurável)
-- [ ] Cache reduz requests OSM em 80%+ para mesma região
-- [ ] Fallback funciona se OSM estiver offline
-- [ ] Cache limpa automaticamente tiles antigos
-- [ ] Tamanho máximo de cache configurável
-- [ ] Testes existentes continuam passando
+- [ ] Users can create new construction projects (obras)
+- [ ] Projects have name, address, client, and status fields
+- [ ] Reports are linked to specific projects via obra_id FK
+- [ ] Project selector dropdown appears on main interface
+- [ ] Projects can be archived when complete
+- [ ] No console errors in browser or backend logs
+- [ ] Existing photo processing functionality still works
 
-=== STARTUP COMMAND (SPEC 006) ===
+=== STARTUP COMMAND (SPEC 010) ===
 
 To continue building this spec, run:
 
-  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 006 --parallel 1
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 010 --parallel 1
 
 To start the development environment manually:
 
-  # 1. Install dependencies (if needed)
-  pip install -r requirements.txt
+  # 1. Start PostgreSQL
+  docker-compose up -d db
 
-  # 2. Start API
+  # 2. Run migrations
+  alembic upgrade head
+
+  # 3. Start Backend API
   uvicorn src.main:app --reload --port 8000
 
-  # 3. Run tests
-  pytest tests/ -v
+  # 4. Serve Frontend
+  python -m http.server 8080 -d src/frontend
 
-=== END SESSION 1 (PLANNER - SPEC 006) ===
+  # Access:
+  # - Frontend: http://localhost:8080
+  # - API: http://localhost:8002 (Docker) or http://localhost:8000 (local)
+  # - API Docs: http://localhost:8002/docs
+
+=== END SESSION 1 (PLANNER - SPEC 010) ===

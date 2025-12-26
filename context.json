@@ -1,67 +1,70 @@
 {
   "files_to_modify": {
-    "main": [
-      "src/core/database.py",
-      "src/core/config.py",
+    "backend": [
       "src/models/__init__.py",
       "src/schemas/__init__.py",
-      "src/api/v1/router.py",
+      "src/repositories/__init__.py",
+      "src/api/v1/endpoints/__init__.py",
       "src/main.py",
-      "docker-compose.yml",
-      ".env.example",
-      "requirements.txt"
+      "alembic/versions/001_initial.py"
+    ],
+    "frontend": [
+      "src/frontend/index.html"
     ]
   },
   "files_to_create": {
-    "main": [
-      "src/models/base.py",
-      "src/models/photo_report.py",
-      "src/models/photo_item.py",
-      "src/schemas/photo_report.py",
-      "src/schemas/photo_item.py",
-      "src/repositories/__init__.py",
-      "src/repositories/photo_report_repository.py",
-      "src/repositories/photo_item_repository.py",
-      "src/api/v1/endpoints/__init__.py",
-      "src/api/v1/endpoints/reports.py",
-      "alembic.ini",
-      "alembic/env.py",
-      "alembic/script.py.mako",
-      "alembic/versions/001_initial.py",
-      "tests/test_repositories.py",
-      "tests/test_reports_api.py"
+    "backend": [
+      "src/models/obra.py",
+      "src/schemas/obra.py",
+      "src/repositories/obra_repository.py",
+      "src/api/v1/endpoints/obras.py",
+      "alembic/versions/002_add_obras.py",
+      "tests/test_obras.py"
     ]
   },
   "files_to_reference": [
-    "src/services/exif_service.py",
-    "src/services/map_service.py",
-    "src/core/config.py",
-    "tests/test_exif_service.py",
-    "tests/test_map_service.py"
+    "src/models/photo_report.py",
+    "src/models/base.py",
+    "src/schemas/photo_report.py",
+    "src/repositories/photo_report_repository.py",
+    "src/api/v1/endpoints/reports.py",
+    "alembic/versions/001_initial.py",
+    "src/frontend/index.html"
   ],
   "patterns": {
-    "service_pattern": "Classes with logging, Portuguese docstrings (Google-style), try/except error handling. Example: ExifService, MapService",
-    "singleton_pattern": "get_*_service() functions for singleton instances. Example: get_map_service()",
-    "config_pattern": "pydantic-settings BaseSettings with Config class, .env loading, singleton 'settings' export",
-    "test_pattern": "pytest fixtures, descriptive Portuguese docstrings, assert statements",
-    "api_pattern": "FastAPI APIRouter with prefix '/api/v1', include_router in main.py"
+    "model_pattern": "SQLAlchemy 2.0 with Mapped[], mapped_column(), UUID primary keys, TimestampMixin for created_at/updated_at",
+    "repository_pattern": "Class with AsyncSession, CRUD methods (create, get_by_id, list, update, delete), logging, try/except",
+    "schema_pattern": "Pydantic v2 with Base, Create, Update, Response schemas. Field() for validations, ConfigDict for ORM",
+    "api_pattern": "APIRouter with prefix/tags, Depends(get_async_session), helper _to_response() function",
+    "migration_pattern": "Alembic op.create_table, op.create_index, comments on columns, FK with ondelete=CASCADE",
+    "frontend_pattern": "CSS variables, state object, template literals, showToast(), modal with .hidden class"
   },
   "existing_implementations": {
-    "description": "database.py is a placeholder file. No existing ORM, migrations, or database patterns. This is a greenfield database integration.",
+    "description": "PhotoReport/PhotoItem models exist in worktree-004 with full CRUD patterns. Need to follow same structure for Obra model.",
     "relevant_files": [
-      "src/core/database.py",
-      "src/core/config.py"
+      ".worktrees/004-persist-ncia-real-no-postgresql/src/models/photo_report.py",
+      ".worktrees/004-persist-ncia-real-no-postgresql/src/repositories/photo_report_repository.py",
+      ".worktrees/004-persist-ncia-real-no-postgresql/src/schemas/photo_report.py",
+      ".worktrees/004-persist-ncia-real-no-postgresql/src/api/v1/endpoints/reports.py"
     ],
-    "notes": "Will need to implement full SQLAlchemy async setup with AsyncSession factory"
+    "notes": "Main branch has minimal structure. Need to ensure models/schemas/repos directories exist or are created."
   },
   "tech_stack": {
     "language": "python",
     "framework": "fastapi",
     "validation": "pydantic v2",
     "settings": "pydantic-settings",
-    "orm": "sqlalchemy 2.0 (to be added)",
-    "migrations": "alembic (to be added)",
-    "database_driver": "asyncpg (to be added)",
-    "testing": "pytest"
+    "orm": "sqlalchemy 2.0",
+    "migrations": "alembic",
+    "database_driver": "asyncpg",
+    "testing": "pytest",
+    "frontend": "vanilla html/css/javascript"
+  },
+  "naming_conventions": {
+    "models": "PascalCase (Obra, PhotoReport)",
+    "tables": "snake_case plural (obras, photo_reports)",
+    "endpoints": "snake_case (criar_obra, listar_obras)",
+    "variables": "snake_case Portuguese (nome_obra, endereco)",
+    "docstrings": "Portuguese, Google-style"
   }
 }
