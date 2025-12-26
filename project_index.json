@@ -1,0 +1,44 @@
+{
+  "project_type": "single",
+  "services": {
+    "main": {
+      "path": ".",
+      "tech_stack": ["python", "fastapi", "pydantic"],
+      "port": 8000,
+      "external_port": 8002,
+      "dev_command": "uvicorn src.main:app --reload --host 0.0.0.0 --port 8000",
+      "test_command": "pytest tests/",
+      "entry_point": "src/main.py"
+    },
+    "postgresql": {
+      "path": ".",
+      "tech_stack": ["postgresql"],
+      "port": 5432,
+      "dev_command": "docker-compose up -d db",
+      "type": "infrastructure"
+    }
+  },
+  "infrastructure": {
+    "docker": true,
+    "database": "postgresql",
+    "docker_compose": "docker-compose.yml"
+  },
+  "conventions": {
+    "linter": "none",
+    "formatter": "none",
+    "testing": "pytest",
+    "docstring_style": "google",
+    "docstring_language": "portuguese",
+    "logging": "module_logger"
+  },
+  "directories": {
+    "source": "src",
+    "tests": "tests",
+    "models": "src/models",
+    "schemas": "src/schemas",
+    "services": "src/services",
+    "api": "src/api",
+    "core": "src/core",
+    "uploads": "uploads"
+  }
+}

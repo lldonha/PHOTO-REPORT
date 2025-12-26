@@ -1,82 +1,123 @@
 === AUTO-BUILD PROGRESS ===
 
-Project: PHOTO-REPORT - Relatório Fotográfico de Obras
+Project: PHOTO-REPORT - Persistencia Real no PostgreSQL
 Workspace: E:\Projetos\PHOTO-REPORT
-Started: 2025-12-25 20:00 (Planner Session)
+Started: 2025-12-26 (Planner Session for Spec 004)
 
 Workflow Type: feature
-Rationale: Projeto greenfield completo com frontend, backend API, banco de dados e Docker.
-           Envolve processamento de imagem, extração EXIF, geração de PDF.
+Rationale: Nova funcionalidade significativa que adiciona camada completa de persistencia
+           de dados com SQLAlchemy ORM, Alembic migrations, repositorios CRUD e novos
+           endpoints REST para relatórios fotograficos.
 
-Session 1 (Planner):
+Session 1 (Planner - Spec 004):
 - Created implementation_plan.json
-- Phases: 9
-- Total subtasks: 20
-- Created init.sh
-- Updated project_index.json
-- Updated context.json
+- Phases: 8
+- Total subtasks: 22
+- Updated init.sh
+- Created project_index.json
+- Created context.json
 
 Phase Summary:
-1. [phase-1-setup] Setup - Estrutura de Diretórios e Configuração: 3 subtasks, depends on []
-2. [phase-2-backend-core] Backend - Módulos Python Core: 5 subtasks, depends on [phase-1-setup]
-3. [phase-3-backend-api] Backend - API FastAPI: 1 subtask, depends on [phase-2-backend-core]
-4. [phase-4-database] Database - Schema SQL: 1 subtask, depends on [phase-1-setup]
-5. [phase-5-frontend] Frontend - Interface HTML: 1 subtask, depends on [phase-3-backend-api]
-6. [phase-6-documentation] Documentation - Skills e Context: 3 subtasks, depends on [phase-1-setup]
-7. [phase-7-docker-build] Docker Build - Container Python: 3 subtasks, depends on [phase-3-backend-api, phase-4-database]
-8. [phase-8-database-setup] Database Setup - Criar Tabelas: 1 subtask, depends on [phase-4-database, phase-7-docker-build]
-9. [phase-9-integration] Integration - Verificação End-to-End: 3 subtasks, depends on [phase-5-frontend, phase-7-docker-build, phase-8-database-setup]
+1. [phase-1-infrastructure] Infrastructure Setup: 3 subtasks, depends on []
+   - Adicionar dependencias (SQLAlchemy, asyncpg, Alembic)
+   - Configurar PostgreSQL no docker-compose
+   - Adicionar variaveis de ambiente DATABASE_URL
+
+2. [phase-2-database] Database Layer: 5 subtasks, depends on [phase-1-infrastructure]
+   - Implementar conexao SQLAlchemy async
+   - Criar base declarativa
+   - Criar modelo PhotoReport
+   - Criar modelo PhotoItem
+   - Exportar modelos
+
+3. [phase-3-migrations] Alembic Migrations: 3 subtasks, depends on [phase-2-database]
+   - Configurar alembic.ini
+   - Criar alembic/env.py
+   - Criar migracao inicial
+
+4. [phase-4-schemas] Pydantic Schemas: 3 subtasks, depends on [phase-2-database] (PARALLEL with phase-3)
+   - Criar schemas PhotoReport
+   - Criar schemas PhotoItem
+   - Exportar schemas
+
+5. [phase-5-repositories] Repository Layer: 2 subtasks, depends on [phase-3-migrations, phase-4-schemas]
+   - Criar PhotoReportRepository
+   - Criar PhotoItemRepository
+
+6. [phase-6-api] REST API Endpoints: 5 subtasks, depends on [phase-5-repositories]
+   - POST /reports (criar)
+   - GET /reports, GET /reports/{id}, DELETE /reports/{id}
+   - POST /reports/{id}/photos (adicionar foto)
+   - POST /reports/{id}/pdf (gerar PDF)
+   - Registrar router e startup event
+
+7. [phase-7-tests] Unit and Integration Tests: 2 subtasks, depends on [phase-6-api]
+   - Testes repositorios
+   - Testes API endpoints
+
+8. [phase-8-integration] Integration and Verification: 4 subtasks, depends on [phase-7-tests]
+   - Docker Compose funciona
+   - Migrations rodam
+   - Testes passam
+   - Fluxo E2E completo
 
 Services Involved:
-- photo-processor (primary): API Python FastAPI para processamento de fotos, EXIF, overlay e PDF
-- frontend (primary): Interface web HTML pura com upload drag-and-drop
-- database (integration): PostgreSQL banco cosmic para persistência
-- docker: Container e orquestração
+- main (primary): API Python FastAPI com novos endpoints de persistencia
+- postgresql (infrastructure): Banco de dados para relatórios e fotos
 
 Parallelism Analysis:
-- Max parallel phases: 3
-- Recommended workers: 2
+- Max parallel phases: 2
+- Recommended workers: 1 (sequential recomendado para primeira integracao DB)
 - Parallel groups:
-  * [phase-4-database, phase-6-documentation] - Ambos dependem apenas de phase-1-setup
-  * [phase-5-frontend, phase-6-documentation] - Diferentes dependências, arquivos distintos
+  * [phase-3-migrations, phase-4-schemas] - Ambos dependem de phase-2-database, arquivos distintos
 
-Files to Create (20+):
-- src/python/processor.py - API FastAPI principal
-- src/python/exif_extractor.py - Extração EXIF
-- src/python/overlay_generator.py - Overlay com Pillow
-- src/python/map_generator.py - Mini-mapas com py-staticmaps
-- src/python/pdf_generator.py - PDF com WeasyPrint
-- src/python/requirements.txt - Dependências Python
-- src/docker/Dockerfile - Container Python
-- src/docker/docker-compose.yml - Orquestração Docker
-- src/frontend/index.html - Interface web
-- scripts/sql/create-tables.sql - Schema SQL
-- .claude/skills/photo-processor/SKILL.md - Skill do Claude
-- README.md - Documentação principal
-- Context/arquitetura.md - Documentação arquitetura
-- Context/escopo-mvp.md - Escopo do MVP
-- Tasks/Queue/*.md - Task files
-- Tasks/Backlog/*.md - Backlog files
+Files to Create (15+):
+- src/models/base.py - Base declarativa SQLAlchemy
+- src/models/photo_report.py - Modelo PhotoReport
+- src/models/photo_item.py - Modelo PhotoItem
+- src/schemas/photo_report.py - Schemas Pydantic reports
+- src/schemas/photo_item.py - Schemas Pydantic items
+- src/repositories/photo_report_repository.py - CRUD reports
+- src/repositories/photo_item_repository.py - CRUD items
+- src/api/v1/endpoints/reports.py - Endpoints REST
+- alembic.ini - Configuracao Alembic
+- alembic/env.py - Ambiente migracao
+- alembic/versions/001_initial.py - Migracao inicial
+- tests/test_repositories.py - Testes repositorios
+- tests/test_reports_api.py - Testes API
+
+Files to Modify (9):
+- requirements.txt - Adicionar sqlalchemy, asyncpg, alembic
+- docker-compose.yml - Adicionar servico PostgreSQL
+- .env.example - Adicionar variaveis de banco
+- src/core/config.py - Adicionar DATABASE_URL
+- src/core/database.py - Implementar conexao async
+- src/models/__init__.py - Exportar modelos
+- src/schemas/__init__.py - Exportar schemas
+- src/api/v1/router.py - Registrar router reports
+- src/main.py - Adicionar startup event
 
 === STARTUP COMMAND ===
 
-Para Windows (PowerShell/CMD), execute manualmente as fases.
-Para Linux/Mac com orchestrator:
+Para continuar a implementacao, execute:
 
-  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 001 --parallel 2
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 004 --parallel 1
 
-Ou para execução manual:
+Ou para execucao manual:
 
-  # 1. Criar estrutura de diretórios
-  mkdir -p .claude/skills/photo-processor/references Context Tasks/{Backlog,Queue,InProgress,Done} src/{docker,python,frontend} scripts/sql workflows/n8n
+  # 1. Instalar dependencias
+  pip install sqlalchemy[asyncio] asyncpg alembic
 
-  # 2. Build e start do container
-  cd src/docker && docker-compose build && docker-compose up -d
+  # 2. Subir PostgreSQL
+  docker-compose up -d db
 
-  # 3. Verificar health
-  curl http://localhost:8002/health
+  # 3. Rodar migrations
+  alembic upgrade head
 
-  # 4. Executar SQL
-  docker exec -it pg psql -U lucas -d cosmic -f /scripts/sql/create-tables.sql
+  # 4. Iniciar API
+  uvicorn src.main:app --reload --port 8000
 
-=== END SESSION 1 (PLANNER) ===
+  # 5. Testar
+  pytest tests/ -v
+
+=== END SESSION 1 (PLANNER - SPEC 004) ===

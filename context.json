@@ -1,0 +1,67 @@
+{
+  "files_to_modify": {
+    "main": [
+      "src/core/database.py",
+      "src/core/config.py",
+      "src/models/__init__.py",
+      "src/schemas/__init__.py",
+      "src/api/v1/router.py",
+      "src/main.py",
+      "docker-compose.yml",
+      ".env.example",
+      "requirements.txt"
+    ]
+  },
+  "files_to_create": {
+    "main": [
+      "src/models/base.py",
+      "src/models/photo_report.py",
+      "src/models/photo_item.py",
+      "src/schemas/photo_report.py",
+      "src/schemas/photo_item.py",
+      "src/repositories/__init__.py",
+      "src/repositories/photo_report_repository.py",
+      "src/repositories/photo_item_repository.py",
+      "src/api/v1/endpoints/__init__.py",
+      "src/api/v1/endpoints/reports.py",
+      "alembic.ini",
+      "alembic/env.py",
+      "alembic/script.py.mako",
+      "alembic/versions/001_initial.py",
+      "tests/test_repositories.py",
+      "tests/test_reports_api.py"
+    ]
+  },
+  "files_to_reference": [
+    "src/services/exif_service.py",
+    "src/services/map_service.py",
+    "src/core/config.py",
+    "tests/test_exif_service.py",
+    "tests/test_map_service.py"
+  ],
+  "patterns": {
+    "service_pattern": "Classes with logging, Portuguese docstrings (Google-style), try/except error handling. Example: ExifService, MapService",
+    "singleton_pattern": "get_*_service() functions for singleton instances. Example: get_map_service()",
+    "config_pattern": "pydantic-settings BaseSettings with Config class, .env loading, singleton 'settings' export",
+    "test_pattern": "pytest fixtures, descriptive Portuguese docstrings, assert statements",
+    "api_pattern": "FastAPI APIRouter with prefix '/api/v1', include_router in main.py"
+  },
+  "existing_implementations": {
+    "description": "database.py is a placeholder file. No existing ORM, migrations, or database patterns. This is a greenfield database integration.",
+    "relevant_files": [
+      "src/core/database.py",
+      "src/core/config.py"
+    ],
+    "notes": "Will need to implement full SQLAlchemy async setup with AsyncSession factory"
+  },
+  "tech_stack": {
+    "language": "python",
+    "framework": "fastapi",
+    "validation": "pydantic v2",
+    "settings": "pydantic-settings",
+    "orm": "sqlalchemy 2.0 (to be added)",
+    "migrations": "alembic (to be added)",
+    "database_driver": "asyncpg (to be added)",
+    "testing": "pytest"
+  }
+}

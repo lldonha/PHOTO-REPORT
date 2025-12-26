@@ -1,0 +1,568 @@
+{
+  "feature": "Persistencia Real no PostgreSQL",
+  "workflow_type": "feature",
+  "workflow_rationale": "Esta e uma nova funcionalidade significativa que adiciona uma camada completa de persistencia de dados ao sistema. Requer criacao de modelos SQLAlchemy, schemas Pydantic, repositorios CRUD, migracoes Alembic e novos endpoints de API. Segue o fluxo padrao de feature: infraestrutura -> modelos -> repositorios -> API -> integracao.",
+  "phases": [
+    {
+      "id": "phase-1-infrastructure",
+      "name": "Infrastructure Setup",
+      "type": "setup",
+      "description": "Configurar PostgreSQL no docker-compose, adicionar dependencias e configurar variaveis de ambiente",
+      "depends_on": [],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-1-1",
+          "description": "Adicionar dependencias SQLAlchemy, asyncpg e Alembic no requirements.txt",
+          "service": "main",
+          "files_to_modify": ["requirements.txt"],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "pip install sqlalchemy[asyncio] asyncpg alembic --dry-run",
+            "expected": "Would install sqlalchemy asyncpg alembic"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-1-2",
+          "description": "Adicionar servico PostgreSQL no docker-compose.yml com configuracao de rede e volumes",
+          "service": "main",
+          "files_to_modify": ["docker-compose.yml"],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "docker-compose config --services",
+            "expected": "app\ndb"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-1-3",
+          "description": "Adicionar variaveis DATABASE_URL e POSTGRES_* no .env.example e config.py",
+          "service": "main",
+          "files_to_modify": [".env.example", "src/core/config.py"],
+          "files_to_create": [],
+          "patterns_from": ["src/core/config.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.core.config import settings; print(settings.DATABASE_URL)\"",
+            "expected": "postgresql+asyncpg://photo_report:photo_report@localhost:5432/photo_report"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-2-database",
+      "name": "Database Layer",
+      "type": "implementation",
+      "description": "Implementar conexao SQLAlchemy async, modelos ORM e base declarativa",
+      "depends_on": ["phase-1-infrastructure"],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-2-1",
+          "description": "Implementar conexao SQLAlchemy async com engine e session factory em database.py",
+          "service": "main",
+          "files_to_modify": ["src/core/database.py"],
+          "files_to_create": [],
+          "patterns_from": ["src/core/config.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.core.database import engine, async_session_maker; print('Database engine configured')\"",
+            "expected": "Database engine configured"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-2",
+          "description": "Criar base declarativa SQLAlchemy com mixins de timestamps em models/base.py",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/models/base.py"],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.models.base import Base, TimestampMixin; print('Base models OK')\"",
+            "expected": "Base models OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-3",
+          "description": "Criar modelo SQLAlchemy PhotoReport com UUID, title, description, pdf_path, status, timestamps",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/models/photo_report.py"],
+          "patterns_from": ["src/services/exif_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.models.photo_report import PhotoReport; print(PhotoReport.__tablename__)\"",
+            "expected": "photo_reports"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-4",
+          "description": "Criar modelo SQLAlchemy PhotoItem com FK para report, paths, metadados EXIF, sequence_order",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/models/photo_item.py"],
+          "patterns_from": ["src/services/exif_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.models.photo_item import PhotoItem; print(PhotoItem.__tablename__)\"",
+            "expected": "photo_items"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-5",
+          "description": "Exportar modelos no __init__.py e configurar relacionamentos ORM",
+          "service": "main",
+          "files_to_modify": ["src/models/__init__.py"],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.models import PhotoReport, PhotoItem; print('Models exported')\"",
+            "expected": "Models exported"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-3-migrations",
+      "name": "Alembic Migrations",
+      "type": "implementation",
+      "description": "Configurar Alembic e criar migracao inicial para as tabelas",
+      "depends_on": ["phase-2-database"],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-3-1",
+          "description": "Configurar alembic.ini e criar estrutura de diretorios alembic/",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["alembic.ini", "alembic/script.py.mako"],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "test -f alembic.ini && echo 'alembic.ini exists'",
+            "expected": "alembic.ini exists"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-3-2",
+          "description": "Criar alembic/env.py com configuracao async e importacao dos modelos",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["alembic/env.py"],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"exec(open('alembic/env.py').read().split('def run_migrations')[0]); print('env.py syntax OK')\"",
+            "expected": "env.py syntax OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-3-3",
+          "description": "Criar migracao inicial 001_initial.py com tabelas photo_reports e photo_items",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["alembic/versions/001_initial.py"],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "test -f alembic/versions/001_initial.py && echo 'Migration exists'",
+            "expected": "Migration exists"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-4-schemas",
+      "name": "Pydantic Schemas",
+      "type": "implementation",
+      "description": "Criar schemas Pydantic para request/response dos endpoints",
+      "depends_on": ["phase-2-database"],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-4-1",
+          "description": "Criar schemas Pydantic para PhotoReport: Create, Update, Response, List",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/schemas/photo_report.py"],
+          "patterns_from": ["src/services/exif_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.schemas.photo_report import PhotoReportCreate, PhotoReportResponse; print('Report schemas OK')\"",
+            "expected": "Report schemas OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-2",
+          "description": "Criar schemas Pydantic para PhotoItem: Create, Response, com metadados EXIF",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/schemas/photo_item.py"],
+          "patterns_from": ["src/services/exif_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.schemas.photo_item import PhotoItemCreate, PhotoItemResponse; print('Item schemas OK')\"",
+            "expected": "Item schemas OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-3",
+          "description": "Exportar schemas no __init__.py",
+          "service": "main",
+          "files_to_modify": ["src/schemas/__init__.py"],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.schemas import PhotoReportCreate, PhotoItemCreate; print('Schemas exported')\"",
+            "expected": "Schemas exported"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-5-repositories",
+      "name": "Repository Layer",
+      "type": "implementation",
+      "description": "Implementar repositorios CRUD para operacoes de banco de dados",
+      "depends_on": ["phase-3-migrations", "phase-4-schemas"],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-5-1",
+          "description": "Criar repositorio PhotoReportRepository com metodos CRUD async",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/repositories/__init__.py", "src/repositories/photo_report_repository.py"],
+          "patterns_from": ["src/services/exif_service.py", "src/services/map_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.repositories.photo_report_repository import PhotoReportRepository; print('Report repository OK')\"",
+            "expected": "Report repository OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-2",
+          "description": "Criar repositorio PhotoItemRepository com metodos CRUD async e vinculacao ao report",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/repositories/photo_item_repository.py"],
+          "patterns_from": ["src/services/exif_service.py", "src/services/map_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.repositories.photo_item_repository import PhotoItemRepository; print('Item repository OK')\"",
+            "expected": "Item repository OK"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-6-api",
+      "name": "REST API Endpoints",
+      "type": "implementation",
+      "description": "Implementar endpoints REST para CRUD de reports e photos",
+      "depends_on": ["phase-5-repositories"],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-6-1",
+          "description": "Criar endpoint POST /api/v1/reports para criar relatorio",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["src/api/v1/endpoints/__init__.py", "src/api/v1/endpoints/reports.py"],
+          "patterns_from": ["src/api/v1/router.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.api.v1.endpoints.reports import router; print('Reports router OK')\"",
+            "expected": "Reports router OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-2",
+          "description": "Adicionar endpoints GET /reports (lista), GET /reports/{id} (detalhe) e DELETE /reports/{id}",
+          "service": "main",
+          "files_to_modify": ["src/api/v1/endpoints/reports.py"],
+          "files_to_create": [],
+          "patterns_from": ["src/api/v1/router.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.api.v1.endpoints.reports import router; print(len([r for r in router.routes]))\"",
+            "expected": "4"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-3",
+          "description": "Adicionar endpoint POST /reports/{id}/photos para adicionar foto ao relatorio",
+          "service": "main",
+          "files_to_modify": ["src/api/v1/endpoints/reports.py"],
+          "files_to_create": [],
+          "patterns_from": ["src/api/v1/router.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.api.v1.endpoints.reports import router; routes = [r.path for r in router.routes]; print('/{report_id}/photos' in routes)\"",
+            "expected": "True"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-4",
+          "description": "Adicionar endpoint POST /reports/{id}/pdf para gerar e salvar PDF",
+          "service": "main",
+          "files_to_modify": ["src/api/v1/endpoints/reports.py"],
+          "files_to_create": [],
+          "patterns_from": ["src/api/v1/router.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"from src.api.v1.endpoints.reports import router; routes = [r.path for r in router.routes]; print('/{report_id}/pdf' in routes)\"",
+            "expected": "True"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-5",
+          "description": "Registrar router de reports no router principal v1 e adicionar startup event no main.py",
+          "service": "main",
+          "files_to_modify": ["src/api/v1/router.py", "src/main.py"],
+          "files_to_create": [],
+          "patterns_from": ["src/main.py"],
+          "verification": {
+            "type": "api",
+            "method": "GET",
+            "url": "http://localhost:8000/api/v1/reports",
+            "expected_status": 200
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-7-tests",
+      "name": "Unit and Integration Tests",
+      "type": "implementation",
+      "description": "Criar testes para repositorios e endpoints de API",
+      "depends_on": ["phase-6-api"],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-7-1",
+          "description": "Criar testes unitarios para PhotoReportRepository e PhotoItemRepository",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["tests/test_repositories.py"],
+          "patterns_from": ["tests/test_exif_service.py", "tests/test_map_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"import ast; ast.parse(open('tests/test_repositories.py').read()); print('Syntax OK')\"",
+            "expected": "Syntax OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-7-2",
+          "description": "Criar testes de integracao para endpoints de reports usando TestClient",
+          "service": "main",
+          "files_to_modify": [],
+          "files_to_create": ["tests/test_reports_api.py"],
+          "patterns_from": ["tests/test_exif_service.py", "tests/test_map_service.py"],
+          "verification": {
+            "type": "command",
+            "command": "python -c \"import ast; ast.parse(open('tests/test_reports_api.py').read()); print('Syntax OK')\"",
+            "expected": "Syntax OK"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-8-integration",
+      "name": "Integration and Verification",
+      "type": "integration",
+      "description": "Verificar integracao completa de todos os servicos e fluxo end-to-end",
+      "depends_on": ["phase-7-tests"],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-8-1",
+          "description": "Verificar que Docker Compose sobe PostgreSQL e app corretamente",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "docker-compose config --services",
+            "expected": "app\ndb"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-8-2",
+          "description": "Verificar que migracoes Alembic rodam sem erro",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "alembic upgrade head",
+            "expected": "Running upgrade"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-8-3",
+          "description": "Executar todos os testes e verificar que passam",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "pytest tests/ -v",
+            "expected": "passed"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-8-4",
+          "description": "Verificar fluxo E2E: criar report, adicionar fotos, gerar PDF, buscar, deletar",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "POST /api/v1/reports - criar relatorio",
+              "POST /api/v1/reports/{id}/photos - adicionar 2 fotos",
+              "GET /api/v1/reports/{id} - buscar relatorio com fotos",
+              "POST /api/v1/reports/{id}/pdf - gerar PDF",
+              "GET /api/v1/reports - listar relatorios",
+              "DELETE /api/v1/reports/{id} - deletar relatorio",
+              "GET /api/v1/reports/{id} - confirmar 404"
+            ]
+          },
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_phases": 8,
+    "total_subtasks": 22,
+    "services_involved": ["main", "postgresql"],
+    "parallelism": {
+      "max_parallel_phases": 2,
+      "parallel_groups": [
+        {
+          "phases": ["phase-3-migrations", "phase-4-schemas"],
+          "reason": "Both depend only on phase-2-database, different file sets (alembic/ vs src/schemas/)"
+        }
+      ],
+      "recommended_workers": 1,
+      "speedup_estimate": "Sequential execution recommended for first database integration - ensures proper dependency resolution"
+    },
+    "startup_command": "source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 004 --parallel 1"
+  },
+  "verification_strategy": {
+    "risk_level": "medium",
+    "skip_validation": false,
+    "test_creation_phase": "phase-7-tests",
+    "test_types_required": ["unit", "integration"],
+    "security_scanning_required": false,
+    "staging_deployment_required": false,
+    "acceptance_criteria": [
+      "All existing tests pass (exif_service, map_service)",
+      "New repository tests pass",
+      "New API integration tests pass",
+      "Alembic migrations run successfully",
+      "Docker Compose starts PostgreSQL correctly",
+      "CRUD operations work via Swagger UI",
+      "Cascade delete removes associated photo_items"
+    ],
+    "verification_steps": [
+      {
+        "name": "Existing Tests",
+        "command": "pytest tests/test_exif_service.py tests/test_map_service.py -v",
+        "expected_outcome": "All tests pass",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Repository Tests",
+        "command": "pytest tests/test_repositories.py -v",
+        "expected_outcome": "All repository tests pass",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "API Integration Tests",
+        "command": "pytest tests/test_reports_api.py -v",
+        "expected_outcome": "All API tests pass",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      }
+    ],
+    "reasoning": "Medium risk database integration requires unit tests for CRUD operations and integration tests for API endpoints and transaction handling"
+  },
+  "qa_acceptance": {
+    "unit_tests": {
+      "required": true,
+      "commands": ["pytest tests/test_repositories.py -v"],
+      "minimum_coverage": null
+    },
+    "integration_tests": {
+      "required": true,
+      "commands": ["pytest tests/test_reports_api.py -v"],
+      "services_to_test": ["main", "postgresql"]
+    },
+    "e2e_tests": {
+      "required": true,
+      "commands": [],
+      "flows": ["create-report", "add-photos", "generate-pdf", "delete-report"]
+    },
+    "browser_verification": {
+      "required": true,
+      "pages": [
+        {"url": "http://localhost:8000/docs", "checks": ["Swagger UI renders", "Reports endpoints visible"]},
+        {"url": "http://localhost:8000/docs#/reports", "checks": ["CRUD operations available"]}
+      ]
+    },
+    "database_verification": {
+      "required": true,
+      "checks": [
+        "Tables photo_reports and photo_items exist",
+        "Foreign key constraint on photo_items.report_id works",
+        "Cascade delete removes associated items",
+        "Indexes idx_photo_items_report_id and idx_photo_reports_created_at exist"
+      ]
+    }
+  },
+  "qa_signoff": null
+}
