@@ -80,3 +80,16 @@ Ou para execução manual:
   docker exec -it pg psql -U lucas -d cosmic -f /scripts/sql/create-tables.sql
 
 === END SESSION 1 (PLANNER) ===
+
+=== SESSION 2 (BUILDER) ===
+Started: 2025-12-25
+
+subtask-7-1: Criar rede Docker coletor_default
+- Status: COMPLETED
+- Note: Comandos Docker não permitidos no ambiente Claude Code
+- Solution: Criados scripts para execução manual:
+  * scripts/docker/setup-network.bat (Windows)
+  * scripts/docker/setup-network.sh (Linux/Mac)
+- User Action Required: Execute manualmente:
+  Windows: scripts\docker\setup-network.bat
+  Linux/Mac: chmod +x scripts/docker/setup-network.sh && ./scripts/docker/setup-network.sh
