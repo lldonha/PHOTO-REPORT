@@ -1292,7 +1292,11 @@
                     latitude: foto.metadados.latitude,
                     longitude: foto.metadados.longitude,
                     direcao_graus: foto.metadados.direcao_graus,
-                    incluir_minimapa: foto.metadados.tem_gps
+                    altitude: foto.metadados.altitude,
+                    acuracia: foto.metadados.acuracia,
+                    nome_projeto: 'LLD Engenharia', // TODO: Permitir usuário definir
+                    incluir_minimapa: foto.metadados.tem_gps,
+                    usar_overlay_v2: true  // Usa overlay V2 (Solocator style) por padrão
                 })
             });
 
