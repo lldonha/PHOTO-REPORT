@@ -1431,6 +1431,11 @@
 
             setLoading(false);
 
+            // Reinicializa Sortable após adicionar novas fotos
+            if (sucessos > 0) {
+                initSortable();
+            }
+
             if (sucessos > 0 && erros === 0) {
                 showToast(`${sucessos} foto(s) processada(s) com sucesso!`);
             } else if (sucessos > 0 && erros > 0) {

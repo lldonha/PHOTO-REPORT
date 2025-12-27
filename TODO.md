@@ -2,13 +2,67 @@
 
 > Lista de tarefas prioritárias para o projeto PHOTO-REPORT
 
-**Última atualização:** 2025-12-27
+**Última atualização:** 2025-12-27 10:00
+**Versão Atual:** v1.1.0
 
 ---
 
 ## 🔥 PRIORIDADE ALTA - Queue
 
-### 1. 🔀 Toggle de Projetos/Obras (Multi-Project Management)
+### 1. 🎨 Melhorar Overlay/Máscara - Estilo Solocator ⭐ PRÓXIMA PRIORIDADE
+
+**Status:** 📋 Planejado
+**Branch:** `007-templates-de-overlay-customiz-veis` (já existe)
+**Prioridade:** 🔥 ALTA (Requisição do usuário)
+**Descrição:** Design mais elegante e profissional para o overlay nas fotos
+
+**Inspiração:** [Solocator GPS Field Camera](https://solocator.com/) - Ver `Research/solocator-research.md`
+
+**Melhorias Desejadas:**
+
+#### Visual
+- [ ] Gradiente suave no fundo (preto transparente → transparente)
+- [ ] Ícones vetoriais para data, GPS, direção (em vez de emojis)
+- [ ] Fonte mais elegante e legível (Roboto, Open Sans, Inter)
+- [ ] Separadores visuais entre metadados
+- [ ] Sombra/outline no texto para melhor contraste
+- [ ] Logo LLD Engenharia no canto
+
+#### Conteúdo (inspirado no Solocator)
+- [ ] Formatar GPS com mais clareza ("Lat: -23.550, Lon: -46.633")
+- [ ] **Acurácia GPS** - Mostrar `± X metros` (ex: "±5m")
+- [ ] **Altitude** - Mostrar `📏 Altitude: 760m` (já está no EXIF!)
+- [ ] **Endereço** via Reverse Geocoding (Google Maps API)
+- [ ] Indicador de direção cardeal com rosa dos ventos visual
+- [ ] **Norte Verdadeiro vs Magnético** (ex: "N 45° True")
+- [ ] Timestamp mais legível (ex: "26/12/2025 às 14:30")
+- [ ] **Indicador de qualidade GPS** - 🟢 ±0-5m, 🟡 ±5-15m, 🔴 ±15m+
+
+#### Layout
+- [ ] Overlay em 2 seções: superior (data/hora) e inferior (GPS, direção)
+- [ ] Largura responsiva (adapta ao tamanho da foto)
+- [ ] Opção de posicionamento (superior, inferior, lateral)
+- [ ] Background semi-transparente elegante
+
+#### Customização
+- [ ] Templates pré-definidos (Simples, Completo, Minimalista)
+- [ ] Escolher quais metadados exibir
+- [ ] Tamanho de fonte ajustável
+- [ ] Cores customizáveis (branding LLD)
+
+**Tecnologias:**
+- Pillow (Python) para desenhar overlay
+- Cairo ou ReportLab para renderização avançada
+- SVG icons (Font Awesome, Material Icons)
+
+**Referências:**
+- `.worktrees/007-templates-de-overlay-customiz-veis/`
+- `Research/solocator-research.md`
+- `Tasks/Queue/003-melhorar-overlay-design.md`
+
+---
+
+### 2. 🔀 Toggle de Projetos/Obras (Multi-Project Management)
 
 **Status:** 📋 Planejado
 **Branch:** `010-multi-project-obra-management` (já existe)
@@ -94,42 +148,6 @@
 
 ---
 
-### 2.1 🗺️ Google Maps Satélite (Substituir OpenStreetMap)
-
-**Status:** 💡 Ideia
-**Prioridade:** ALTA
-**Descrição:** Usar Google Maps Static API com camada satélite para mini-mapas
-
-**Por quê?**
-- ✅ Imagens de satélite mais nítidas
-- ✅ Visualização real do terreno (melhor para obras)
-- ✅ Atualização mais frequente
-- ✅ Camadas: Satélite, Híbrido (satélite + ruas), Terreno
-
-**Tarefas:**
-- [ ] Criar conta Google Cloud Platform
-- [ ] Ativar Google Maps Static API
-- [ ] Obter API Key
-- [ ] Atualizar `src/services/map_service.py` para usar Google Maps
-- [ ] Implementar cache de mini-mapas (evitar custos)
-- [ ] Configurar maptype: `satellite`, `hybrid`, ou `terrain`
-- [ ] Testar qualidade das imagens vs OpenStreetMap
-
-**API Endpoint:**
-```python
-url = f"https://maps.googleapis.com/maps/api/staticmap?center={lat},{lon}&zoom=18&size=300x200&maptype=satellite&markers=color:red%7C{lat},{lon}&key={API_KEY}"
-```
-
-**Custo:**
-- Static Maps: $2 por 1000 requisições
-- **Grátis:** até 28.500 requisições/mês
-- Com cache: custo quase zero!
-
-**Referência:**
-- Ver `Research/solocator-research.md`
-- Docs: https://developers.google.com/maps/documentation/maps-static
-
----
 
 ## 📦 BACKLOG - Futuras Implementações
 
@@ -284,6 +302,38 @@ url = f"https://maps.googleapis.com/maps/api/staticmap?center={lat},{lon}&zoom=1
 
 ## 🏁 DONE - Tarefas Concluídas
 
+### ✅ v1.1.0 (2025-12-27) - Google Maps + Drag & Drop Fix
+
+- [x] **Google Maps Satélite** implementado e funcionando
+  - Google Maps Static API integrado
+  - Maptype: satellite (imagens de satélite em alta resolução)
+  - Fallback automático para OpenStreetMap
+  - Variáveis de ambiente configuradas
+  - API Key ativada no Google Cloud Platform
+  - Testado e validado em produção ✅
+
+- [x] **Drag & Drop Fix** - Reordenação automática
+  - Bug corrigido: `initSortable()` não era chamado após upload
+  - Agora inicializa automaticamente após processar fotos
+  - Testado e validado em produção ✅
+  - Undo/Redo funcionando perfeitamente
+
+- [x] Container rebuilt com novas dependências
+  - `requests==2.31.0`
+  - `python-dotenv==1.0.0`
+
+- [x] Frontend atualizado em produção
+  - Cloudflare Tunnel servindo versão corrigida
+  - Hard refresh funcionando
+
+**Commits:**
+- feat: Implementa Google Maps satélite com fallback OSM
+- fix: Adiciona initSortable() após upload de fotos
+
+**Deploy:** https://diario.lldonha.com/ | https://api.lldonha.com/
+
+---
+
 ### ✅ v1.0.0 (2025-12-26)
 
 - [x] Sistema base completo
@@ -297,7 +347,7 @@ url = f"https://maps.googleapis.com/maps/api/staticmap?center={lat},{lon}&zoom=1
 - [x] Frontend moderno (design blueprint LLD)
 - [x] Integração frontend ↔ backend via Cloudflare Tunnel
 - [x] Docker containerização
-- [x] Deploy em produção (https://diario.lldonha.com/)
+- [x] Deploy em produção
 
 **Branch principal:** `001-criar-sistema-photo-report-completo`
 **Branch merged:** `005-drag-and-drop-photo-reordering`

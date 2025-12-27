@@ -37,7 +37,29 @@
       "Bash(cloudflared tunnel login:*)",
       "Bash(cloudflared tunnel create:*)",
       "Bash(cloudflared tunnel route dns:*)",
-      "Bash(cloudflared tunnel run:*)"
+      "Bash(cloudflared tunnel run:*)",
+      "Bash(docker inspect:*)",
+      "Bash(cat:*)",
+      "Bash(wmic process:*)",
+      "Bash(ps:*)",
+      "Bash(tasklist //V //FI \"PID eq 24464\")",
+      "Bash(taskkill //F //PID 24464)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill //F //PID 54328)",
+      "Bash(start python -m http.server 3000)",
+      "Skill(profile-and-skill-creator)",
+      "Bash(git worktree:*)",
+      "Bash(for dir in .worktrees/*/)",
+      "Bash(git -C \"$dir\" status --short)",
+      "Bash(done)",
+      "Bash(python test_overlay_v2.py:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker build:*)",
+      "Bash(for branch in 001-criar-sistema-photo-report-completo 005-drag-and-drop-photo-reordering 007-templates-de-overlay-customiz-veis 010-multi-project-obra-management)",
+      "Bash(do echo \"=== $branch ===\")",
+      "Bash(taskkill:*)",
+      "Bash(cmd.exe //c taskkill //PID 24116 //F)"
     ]
   }
 }
