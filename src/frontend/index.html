@@ -3,581 +3,762 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📷 PHOTO-REPORT - Relatório Fotográfico de Obra</title>
+    <title>PHOTO-REPORT | LLD Engenharia e Consultoria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success-color: #16a34a;
-            --warning-color: #ca8a04;
-            --error-color: #dc2626;
-            --text-color: #1f2937;
-            --text-secondary: #6b7280;
-            --bg-color: #f3f4f6;
-            --card-bg: #ffffff;
-            --border-color: #e5e7eb;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* LLD Brand Colors */
+            --navy-primary: #1B3A5C;
+            --navy-deep: #0F1F35;
+            --blue-accent: #2B5A8F;
+            --gold-accent: #D4A574;
+            --gold-hover: #C49564;
+            --steel: #4A5568;
+            --concrete: #E5E7EB;
+            --white: #FFFFFF;
+            --off-white: #F8FAFC;
+            --grid-line: rgba(27, 58, 92, 0.08);
+            --grid-line-accent: rgba(212, 165, 116, 0.12);
+
+            /* Technical Grid */
+            --grid-size: 20px;
+            --grid-size-major: 100px;
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--off-white);
+            color: var(--navy-deep);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Technical Blueprint Grid Background */
+        .blueprint-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 1;
+            background-image:
+                linear-gradient(var(--grid-line) 0.5px, transparent 0.5px),
+                linear-gradient(90deg, var(--grid-line) 0.5px, transparent 0.5px),
+                linear-gradient(var(--grid-line-accent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line-accent) 1px, transparent 1px);
+            background-size:
+                var(--grid-size) var(--grid-size),
+                var(--grid-size) var(--grid-size),
+                var(--grid-size-major) var(--grid-size-major),
+                var(--grid-size-major) var(--grid-size-major);
+            pointer-events: none;
+        }
+
+        /* Animated scanline effect */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-accent), transparent);
+            opacity: 0.3;
+            z-index: 1;
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Layout */
+        .app-container {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
         }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, var(--primary-color), #7c3aed);
-            color: white;
+            grid-column: 1 / -1;
+            background: var(--navy-deep);
+            color: var(--white);
             padding: 1.5rem 2rem;
-            box-shadow: var(--shadow-lg);
+            border-bottom: 3px solid var(--gold-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(15, 31, 53, 0.2);
+            position: relative;
         }
 
-        .header h1 {
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 200px;
+            height: 3px;
+            background: var(--white);
+            opacity: 0.2;
+            animation: headerPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes headerPulse {
+            0%, 100% { width: 200px; opacity: 0.2; }
+            50% { width: 400px; opacity: 0.4; }
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-logo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .header-logo h1 {
+            font-family: 'Rajdhani', sans-serif;
             font-size: 1.75rem;
             font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .header-logo p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            opacity: 0.7;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .header-divider {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(180deg, transparent, var(--gold-accent), transparent);
+        }
+
+        .header-company {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold-accent);
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .status-indicator {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid var(--gold-accent);
         }
 
-        .header p {
-            opacity: 0.9;
-            margin-top: 0.25rem;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold-accent);
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        /* Container principal */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--white);
+            border-right: 2px solid var(--concrete);
             padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            box-shadow: 4px 0 20px rgba(15, 31, 53, 0.05);
+            animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Seção de configuração do relatório */
-        .config-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
-        .config-section h2 {
-            font-size: 1.125rem;
-            margin-bottom: 1rem;
+        .section-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--navy-primary);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--gold-accent);
+            position: relative;
         }
 
-        .config-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 100%;
+            background: var(--gold-accent);
+            position: absolute;
+            left: -2rem;
+            top: 0;
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--gold-accent);
+            background: rgba(212, 165, 116, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 2px;
+        }
+
+        /* Form Controls */
+        .form-section {
+            display: flex;
+            flex-direction: column;
             gap: 1rem;
         }
 
-        .form-group {
+        .form-field {
             display: flex;
             flex-direction: column;
-            gap: 0.375rem;
+            gap: 0.5rem;
         }
 
-        .form-group label {
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+        .form-field label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--steel);
+            font-weight: 600;
         }
 
-        .form-group input {
-            padding: 0.625rem 0.875rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+        .form-field input,
+        .form-field textarea {
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--concrete);
+            background: var(--off-white);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--navy-deep);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
         }
 
-        .form-group input:focus {
+        .form-field input:focus,
+        .form-field textarea:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: var(--gold-accent);
+            background: var(--white);
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+            transform: translateY(-2px);
         }
 
-        /* Dropzone */
-        .dropzone {
-            background: var(--card-bg);
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 3rem 2rem;
+        /* Upload Zone */
+        .upload-zone {
+            background: linear-gradient(135deg, var(--off-white) 0%, var(--white) 100%);
+            border: 2px dashed var(--concrete);
+            padding: 2.5rem 1.5rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
         }
 
-        .dropzone:hover,
-        .dropzone.dragover {
-            border-color: var(--primary-color);
-            background: rgba(37, 99, 235, 0.05);
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.1), transparent);
+            transition: left 0.6s ease;
         }
 
-        .dropzone.dragover {
-            transform: scale(1.01);
+        .upload-zone:hover::before {
+            left: 100%;
         }
 
-        .dropzone-icon {
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--gold-accent);
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, var(--white) 100%);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
         }
 
-        .dropzone h3 {
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-zone h3 {
+            font-family: 'Rajdhani', sans-serif;
             font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--navy-primary);
             margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .dropzone p {
-            color: var(--text-secondary);
+        .upload-zone p {
             font-size: 0.875rem;
+            color: var(--steel);
         }
 
-        .dropzone input[type="file"] {
+        .upload-zone input[type="file"] {
             display: none;
         }
 
-        /* Status/Progress */
-        .status-bar {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
+        /* Action Buttons */
+        .action-buttons {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--shadow);
-        }
-
-        .status-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-badge.processing {
-            background: #fef3c7;
-            color: var(--warning-color);
-        }
-
-        .status-badge.ready {
-            background: #dcfce7;
-            color: var(--success-color);
-        }
-
-        .foto-count {
-            font-weight: 500;
-        }
-
-        /* Botões de ação */
-        .actions {
-            display: flex;
+            flex-direction: column;
             gap: 0.75rem;
         }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.625rem 1.25rem;
+            padding: 1rem 1.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             border: none;
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
         }
 
         .btn-primary {
-            background: var(--primary-color);
-            color: white;
+            background: var(--navy-primary);
+            color: var(--white);
+            border: 2px solid var(--navy-primary);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gold-accent);
+            transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: -1;
         }
 
         .btn-primary:hover:not(:disabled) {
-            background: var(--primary-hover);
+            border-color: var(--gold-accent);
+            transform: translateX(4px);
+        }
+
+        .btn-primary:hover:not(:disabled)::before {
+            left: 0;
         }
 
         .btn-secondary {
-            background: white;
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--navy-primary);
+            border: 2px solid var(--concrete);
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: var(--bg-color);
-        }
-
-        .btn-danger {
-            background: #fef2f2;
-            color: var(--error-color);
-            border: 1px solid #fecaca;
-        }
-
-        .btn-danger:hover:not(:disabled) {
-            background: #fee2e2;
+            border-color: var(--steel);
+            background: var(--off-white);
         }
 
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
-        /* Undo/Redo buttons - smaller icon-style buttons */
+        .btn-icon-group {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--concrete);
+        }
+
         .btn-icon {
-            display: inline-flex;
+            width: 40px;
+            height: 40px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: white;
-            color: var(--text-color);
-            font-size: 1rem;
+            background: var(--off-white);
+            border: 2px solid var(--concrete);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
         }
 
         .btn-icon:hover:not(:disabled) {
-            background: var(--bg-color);
-            border-color: var(--primary-color);
-            color: var(--primary-color);
+            border-color: var(--gold-accent);
+            background: var(--white);
+            transform: translateY(-2px);
         }
 
         .btn-icon:disabled {
-            opacity: 0.35;
+            opacity: 0.3;
             cursor: not-allowed;
         }
 
-        .btn-icon[title] {
-            position: relative;
+        /* Main Content Area */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+            animation: fadeIn 1s ease-out;
         }
 
-        /* Undo/Redo button group */
-        .undo-redo-group {
-            display: flex;
-            gap: 0.25rem;
-            margin-right: 0.5rem;
-            padding-right: 0.75rem;
-            border-right: 1px solid var(--border-color);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        /* Hide undo/redo on very small screens to save space */
-        @media (max-width: 480px) {
-            .undo-redo-group {
-                display: none;
+        /* Photo Grid */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        /* Grid de fotos */
-        .fotoGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .foto-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            cursor: grab;
-        }
-
-        .foto-card:hover:not(.sortable-chosen):not(.sortable-ghost) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .foto-card:active {
-            cursor: grabbing;
-        }
-
-        /* SortableJS drag-and-drop styles */
-        .sortable-ghost {
-            opacity: 0.4;
-            background: var(--primary-color);
-        }
-
-        .sortable-ghost * {
-            visibility: hidden;
-        }
-
-        .sortable-chosen {
-            transform: scale(1.02);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            cursor: grabbing;
-            z-index: 100;
-        }
-
-        .sortable-drag {
-            opacity: 1;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
-            z-index: 101;
-        }
-
-        /* Fallback mode styles for touch devices */
-        .sortable-fallback {
-            opacity: 0.9;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-            transform: scale(1.02);
-            z-index: 10000;
-        }
-
-        /* Drop zone indicator when dragging */
-        .sortable-drag-active {
-            border: 2px dashed var(--primary-color);
-            background: rgba(37, 99, 235, 0.08);
-            border-radius: 12px;
-            transition: background 0.2s ease, border-color 0.2s ease;
-            padding: 0.5rem;
-            margin: -0.5rem;
-        }
-
-        /* Individual card drop zone indicator during drag */
-        .sortable-drag-active .foto-card:not(.sortable-ghost):not(.sortable-chosen):not(.sortable-drag) {
-            outline: 2px dashed transparent;
-            outline-offset: 4px;
-            transition: outline-color 0.15s ease, background-color 0.15s ease;
-        }
-
-        .sortable-drag-active .foto-card:not(.sortable-ghost):not(.sortable-chosen):not(.sortable-drag):hover {
-            outline-color: var(--primary-color);
-            background: rgba(37, 99, 235, 0.03);
-        }
-
-        .foto-card-header {
+        /* Photo Card - Technical Blueprint Style */
+        .photo-card {
+            background: var(--white);
+            border: 2px solid var(--concrete);
             position: relative;
+            overflow: hidden;
+            cursor: grab;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 8px rgba(15, 31, 53, 0.08);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
         }
 
-        .foto-card-image {
-            width: 100%;
+        .photo-card:hover:not(.sortable-ghost) {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(15, 31, 53, 0.15);
+            border-color: var(--gold-accent);
+        }
+
+        .photo-card:active {
+            cursor: grabbing;
+        }
+
+        /* Photo card header with image */
+        .photo-card-image-container {
+            position: relative;
             height: 220px;
+            overflow: hidden;
+            background: var(--navy-deep);
+        }
+
+        .photo-card-image {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .foto-card-remove {
+        .photo-card:hover .photo-card-image {
+            transform: scale(1.05);
+        }
+
+        /* Technical overlay on image */
+        .photo-card-overlay {
             position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            transition: background 0.2s;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(15, 31, 53, 0.6) 0%, transparent 30%, transparent 70%, rgba(15, 31, 53, 0.8) 100%);
+            pointer-events: none;
         }
 
-        .foto-card-remove:hover {
-            background: var(--error-color);
-        }
-
-        .foto-card-number {
+        /* Photo number badge - technical style */
+        .photo-number {
             position: absolute;
-            top: 0.75rem;
-            left: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            top: 1rem;
+            left: 1rem;
+            background: var(--navy-deep);
+            color: var(--gold-accent);
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
             font-weight: 600;
+            letter-spacing: 0.1em;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        /* Drag handle for reordering */
-        .foto-card-drag-handle {
+        /* Drag handle */
+        .drag-handle {
             position: absolute;
-            top: 0.75rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border-radius: 4px;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            background: rgba(15, 31, 53, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: grab;
             opacity: 0;
-            transition: opacity 0.2s, background 0.2s;
-            z-index: 1;
+            transition: all 0.3s ease;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
         }
 
-        .foto-card:hover .foto-card-drag-handle {
+        .photo-card:hover .drag-handle {
             opacity: 1;
         }
 
-        .foto-card-drag-handle:hover {
-            background: rgba(37, 99, 235, 0.8);
+        .drag-handle:hover {
+            background: var(--gold-accent);
         }
 
-        .foto-card-drag-handle:active {
+        .drag-handle:active {
             cursor: grabbing;
         }
 
-        /* Drag handle grip dots (6 dots in 2 columns) */
-        .drag-handle-dots {
+        .drag-dots {
             display: grid;
-            grid-template-columns: repeat(2, 4px);
-            grid-template-rows: repeat(3, 4px);
+            grid-template-columns: repeat(2, 3px);
+            grid-template-rows: repeat(3, 3px);
             gap: 2px;
         }
 
-        .drag-handle-dots span {
-            width: 4px;
-            height: 4px;
-            background: white;
+        .drag-dots span {
+            width: 3px;
+            height: 3px;
+            background: var(--white);
             border-radius: 50%;
         }
 
-        /* Always show drag handle on touch devices */
-        @media (hover: none) {
-            .foto-card-drag-handle {
-                opacity: 1;
-            }
+        /* Remove button */
+        .remove-btn {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            background: rgba(220, 38, 38, 0.9);
+            color: var(--white);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
         }
 
-        /* Touch device specific styles */
-        @media (hover: none) and (pointer: coarse) {
-            /* Larger touch targets for mobile */
-            .foto-card-drag-handle {
-                width: 48px;
-                height: 32px;
-            }
-
-            /* Prevent text selection during touch drag */
-            .foto-card {
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                user-select: none;
-            }
-
-            /* Active state feedback for touch */
-            .foto-card:active:not(.sortable-ghost) {
-                transform: scale(0.98);
-                transition: transform 0.1s ease;
-            }
+        .photo-card:hover .remove-btn {
+            opacity: 1;
         }
 
-        /* Single photo state - hide drag handle and remove grab cursor */
-        .fotoGrid.sorting-disabled .foto-card {
-            cursor: default;
+        .remove-btn:hover {
+            background: #991b1b;
+            transform: scale(1.1);
         }
 
-        .fotoGrid.sorting-disabled .foto-card-drag-handle {
-            display: none;
+        /* Photo card body - technical data sheet style */
+        .photo-card-body {
+            padding: 1.25rem;
+            background: var(--white);
         }
 
-        .foto-card-body {
-            padding: 1rem;
-        }
-
-        .foto-filename {
-            font-weight: 500;
-            font-size: 0.9375rem;
-            margin-bottom: 0.75rem;
+        .photo-filename {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--navy-primary);
+            margin-bottom: 1rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        /* Metadados EXIF */
-        .foto-metadata {
+        /* Technical metadata grid */
+        .photo-metadata {
             display: grid;
             grid-template-columns: auto 1fr;
-            gap: 0.375rem 0.75rem;
-            font-size: 0.8125rem;
+            gap: 0.75rem 1rem;
             margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--off-white);
+            border-left: 3px solid var(--gold-accent);
         }
 
-        .foto-metadata-icon {
-            text-align: center;
+        .metadata-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--steel);
+            font-weight: 600;
         }
 
-        .foto-metadata-value {
-            color: var(--text-secondary);
+        .metadata-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--navy-deep);
         }
 
-        .foto-metadata-value.has-data {
-            color: var(--text-color);
+        .metadata-value.no-data {
+            color: var(--steel);
+            opacity: 0.5;
         }
 
-        /* Mini mapa */
-        .foto-minimapa {
+        /* Mini map */
+        .mini-map {
             width: 100%;
-            max-width: 150px;
-            border-radius: 8px;
+            max-width: 140px;
+            border: 2px solid var(--concrete);
             margin-top: 0.75rem;
-            border: 1px solid var(--border-color);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
         }
 
-        /* Campo de legenda */
-        .foto-legenda-group {
-            margin-top: 0.75rem;
+        /* Caption field */
+        .caption-field {
+            margin-top: 1rem;
         }
 
-        .foto-legenda-group label {
+        .caption-field label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--steel);
+            font-weight: 600;
             display: block;
-            font-weight: 500;
-            font-size: 0.8125rem;
-            margin-bottom: 0.375rem;
-            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
         }
 
-        .foto-legenda-input {
+        .caption-field textarea {
             width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+            padding: 0.75rem;
+            border: 2px solid var(--concrete);
+            background: var(--off-white);
+            font-family: 'IBM Plex Sans', sans-serif;
             font-size: 0.875rem;
+            color: var(--navy-deep);
             resize: vertical;
             min-height: 60px;
-            font-family: inherit;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
         }
 
-        .foto-legenda-input:focus {
+        .caption-field textarea:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: var(--gold-accent);
+            background: var(--white);
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.15);
         }
 
-        .foto-legenda-counter {
+        .caption-counter {
             text-align: right;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--steel);
             margin-top: 0.25rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--steel);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--navy-primary);
+            margin-bottom: 0.5rem;
         }
 
         /* Loading overlay */
@@ -587,69 +768,72 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 31, 53, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 9999;
         }
 
         .loading-content {
-            background: white;
-            padding: 2rem 3rem;
-            border-radius: 12px;
             text-align: center;
-            box-shadow: var(--shadow-lg);
+            color: var(--white);
         }
 
         .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(212, 165, 116, 0.2);
+            border-top-color: var(--gold-accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            margin: 0 auto 1.5rem;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        .loading-content h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
         .loading-content p {
-            font-size: 1rem;
-            color: var(--text-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            opacity: 0.7;
         }
 
-        .loading-content .progress-text {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-        }
-
-        /* Mensagens de toast */
+        /* Toast notifications */
         .toast-container {
             position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            z-index: 1001;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 10000;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .toast {
             padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
+            background: var(--white);
+            border-left: 4px solid var(--gold-accent);
+            box-shadow: 0 8px 24px rgba(15, 31, 53, 0.2);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            animation: slideIn 0.3s ease;
+            gap: 1rem;
+            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
             max-width: 400px;
         }
 
-        @keyframes slideIn {
+        @keyframes slideInRight {
             from {
                 transform: translateX(100%);
                 opacity: 0;
@@ -661,232 +845,261 @@
         }
 
         .toast.success {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #bbf7d0;
+            border-left-color: #16a34a;
         }
 
         .toast.error {
-            background: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
+            border-left-color: #dc2626;
         }
 
         .toast.warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
+            border-left-color: #ca8a04;
         }
 
-        /* Estado vazio */
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-secondary);
+        .toast-icon {
+            font-size: 1.5rem;
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
+        .toast-message {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--navy-deep);
         }
 
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .config-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .fotoGrid {
-                grid-template-columns: 1fr;
-            }
-
-            .status-bar {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .actions {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Estilos para preview modal */
-        .modal-overlay {
+        /* Preview modal */
+        .preview-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(15, 31, 53, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 10000;
             padding: 2rem;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .modal-content {
+        .preview-image {
             max-width: 90vw;
             max-height: 90vh;
+            border: 3px solid var(--gold-accent);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        .modal-image {
-            max-width: 100%;
-            max-height: 90vh;
-            border-radius: 8px;
-        }
-
-        .modal-close {
+        .preview-close {
             position: fixed;
-            top: 1rem;
-            right: 1rem;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.9);
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--white);
+            color: var(--navy-deep);
             border: none;
-            border-radius: 50%;
-            font-size: 1.5rem;
+            font-size: 2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+        }
+
+        .preview-close:hover {
+            background: var(--gold-accent);
+            transform: rotate(90deg);
+        }
+
+        /* Sortable styles */
+        .sortable-ghost {
+            opacity: 0.3;
+            background: var(--gold-accent);
+        }
+
+        .sortable-chosen {
+            transform: scale(1.05);
+            box-shadow: 0 16px 40px rgba(15, 31, 53, 0.3);
+            z-index: 100;
         }
 
         .hidden {
             display: none !important;
         }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 2px solid var(--concrete);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-brand {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .header-divider {
+                display: none;
+            }
+
+            .photo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) {
+            .drag-handle,
+            .remove-btn {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <h1>📷 PHOTO-REPORT</h1>
-        <p>Gerador de Relatórios Fotográficos de Obra</p>
-    </header>
+    <!-- Technical Blueprint Grid -->
+    <div class="blueprint-grid"></div>
+    <div class="scanline"></div>
 
-    <main class="container">
-        <!-- Configuração do Relatório -->
-        <section class="config-section">
-            <h2>📄 Configurações do Relatório</h2>
-            <div class="config-grid">
-                <div class="form-group">
-                    <label for="titulo">Título do Relatório</label>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <div class="header-logo">
+                    <h1>PHOTO-REPORT</h1>
+                    <p>Relatório Fotográfico de Obra</p>
+                </div>
+                <div class="header-divider"></div>
+                <div class="header-company">LLD Engenharia e Consultoria</div>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span id="statusText">Sistema Operacional</span>
+                </div>
+                <div class="status-indicator">
+                    <span id="photoCount">0 fotos</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Configuration Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="section-number">01</span>
+                    Configuração
+                </h2>
+                <div class="form-field">
+                    <label>Título do Relatório</label>
                     <input type="text" id="titulo" value="Relatório Fotográfico" placeholder="Ex: Relatório Fotográfico - Vistoria">
                 </div>
-                <div class="form-group">
-                    <label for="obra">Nome da Obra</label>
+                <div class="form-field">
+                    <label>Nome da Obra</label>
                     <input type="text" id="obra" placeholder="Ex: Edifício Residencial Alpha">
                 </div>
-                <div class="form-group">
-                    <label for="responsavel">Responsável Técnico</label>
+                <div class="form-field">
+                    <label>Responsável Técnico</label>
                     <input type="text" id="responsavel" placeholder="Ex: Eng. João Silva - CREA 123456">
                 </div>
             </div>
-        </section>
 
-        <!-- Dropzone para Upload -->
-        <div class="dropzone" id="dropzone">
-            <input type="file" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png">
-            <div class="dropzone-icon">📸</div>
-            <h3>Arraste as fotos aqui</h3>
-            <p>ou clique para selecionar arquivos (JPEG, PNG)</p>
-            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Máximo 100 fotos por relatório</p>
-        </div>
-
-        <!-- Status Bar -->
-        <div class="status-bar" id="statusBar">
-            <div class="status-info">
-                <span class="status-badge ready" id="statusBadge">Pronto</span>
-                <span class="foto-count" id="fotoCount">0 fotos carregadas</span>
+            <!-- Upload Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="section-number">02</span>
+                    Upload
+                </h2>
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png">
+                    <div class="upload-icon">📸</div>
+                    <h3>Arraste fotos aqui</h3>
+                    <p>ou clique para selecionar</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.7;">Máx. 100 fotos | JPEG, PNG</p>
+                </div>
             </div>
-            <div class="actions">
-                <div class="undo-redo-group">
-                    <button class="btn-icon" id="btnUndo" disabled title="Desfazer reordenação (Ctrl+Z)">
-                        ↩️
+
+            <!-- Actions Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <span class="section-number">03</span>
+                    Ações
+                </h2>
+                <div class="btn-icon-group">
+                    <button class="btn-icon" id="btnUndo" disabled title="Desfazer (Ctrl+Z)">↩️</button>
+                    <button class="btn-icon" id="btnRedo" disabled title="Refazer (Ctrl+Y)">↪️</button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="btnGeneratePdf" disabled>
+                        📄 Gerar Relatório PDF
                     </button>
-                    <button class="btn-icon" id="btnRedo" disabled title="Refazer reordenação (Ctrl+Y)">
-                        ↪️
+                    <button class="btn btn-secondary" id="btnClear" disabled>
+                        🗑️ Limpar Todas as Fotos
                     </button>
                 </div>
-                <button class="btn btn-secondary" id="btnLimpar" disabled>
-                    🗑️ Limpar Tudo
-                </button>
-                <button class="btn btn-primary" id="btnGerarPdf" disabled>
-                    📄 Gerar Relatório PDF
-                </button>
             </div>
-        </div>
+        </aside>
 
-        <!-- Grid de Fotos -->
-        <div class="fotoGrid" id="fotoGrid">
-            <!-- Cards de fotos serão inseridos aqui via JavaScript -->
-        </div>
-
-        <!-- Estado vazio -->
-        <div class="empty-state" id="emptyState">
-            <div class="empty-state-icon">📷</div>
-            <p>Nenhuma foto carregada ainda.</p>
-            <p>Arraste fotos para a área acima ou clique para selecionar.</p>
-        </div>
-    </main>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="photo-grid" id="photoGrid">
+                <!-- Empty state -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📷</div>
+                    <h3>Nenhuma Foto Carregada</h3>
+                    <p>Arraste fotos para a área de upload ou clique para selecionar arquivos</p>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <!-- Loading Overlay -->
     <div class="loading-overlay hidden" id="loadingOverlay">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p id="loadingText">Processando...</p>
-            <p class="progress-text" id="loadingProgress"></p>
+            <h3 id="loadingTitle">Processando</h3>
+            <p id="loadingMessage">Aguarde...</p>
         </div>
     </div>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Modal de Preview -->
-    <div class="modal-overlay hidden" id="previewModal">
-        <button class="modal-close" id="modalClose">×</button>
-        <div class="modal-content">
-            <img class="modal-image" id="previewImage" src="" alt="Preview">
-        </div>
+    <!-- Preview Modal -->
+    <div class="preview-modal hidden" id="previewModal">
+        <button class="preview-close" id="previewClose">×</button>
+        <img class="preview-image" id="previewImage" src="" alt="Preview">
     </div>
 
-    <!-- SortableJS Library for drag-and-drop functionality -->
+    <!-- SortableJS Library -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
     <script>
         // ============================================================================
-        // PHOTO-REPORT - Frontend JavaScript
-        // Gerencia upload, visualização e geração de PDF de relatórios fotográficos
+        // PHOTO-REPORT - Modern Frontend JavaScript
         // ============================================================================
 
-        // Configuração da API
-        const API_BASE_URL = 'http://localhost:8002';
+        const API_BASE_URL = 'https://api.lldonha.com';
 
-        // Estado da aplicação
+        // Application state
         const state = {
             fotos: [],
             processando: false
         };
 
-        // Drag-and-drop state (used for ESC key cancel and edge case handling)
         let sortableInstance = null;
         let isDragging = false;
 
-        // ============================================================================
-        // Undo/Redo History Management for Photo Reordering
-        // ============================================================================
-
-        /**
-         * ReorderHistory class implements undo/redo functionality for photo reordering
-         * Uses Command Pattern with two stacks to track order changes
-         * Stores only photo IDs (not full objects) to minimize memory usage
-         */
+        // Undo/Redo History Management
         class ReorderHistory {
             constructor(maxSize = 50) {
                 this.undoStack = [];
@@ -894,97 +1107,57 @@
                 this.maxSize = maxSize;
             }
 
-            /**
-             * Save current state before a reorder operation
-             * @param {Array<string>} photoOrder - Array of photo IDs in current order
-             */
             saveState(photoOrder) {
                 this.undoStack.push([...photoOrder]);
-                this.redoStack = []; // Clear redo on new action
+                this.redoStack = [];
                 if (this.undoStack.length > this.maxSize) {
-                    this.undoStack.shift(); // Remove oldest state if exceeding max
+                    this.undoStack.shift();
                 }
             }
 
-            /**
-             * Undo the last reorder operation
-             * @param {Array<string>} currentOrder - Current array of photo IDs
-             * @returns {Array<string>|null} Previous order array, or null if nothing to undo
-             */
             undo(currentOrder) {
                 if (this.undoStack.length === 0) return null;
                 this.redoStack.push([...currentOrder]);
                 return this.undoStack.pop();
             }
 
-            /**
-             * Redo a previously undone reorder operation
-             * @param {Array<string>} currentOrder - Current array of photo IDs
-             * @returns {Array<string>|null} Next order array, or null if nothing to redo
-             */
             redo(currentOrder) {
                 if (this.redoStack.length === 0) return null;
                 this.undoStack.push([...currentOrder]);
                 return this.redoStack.pop();
             }
 
-            /**
-             * Check if undo is available
-             * @returns {boolean} True if there are states to undo
-             */
             canUndo() {
                 return this.undoStack.length > 0;
             }
 
-            /**
-             * Check if redo is available
-             * @returns {boolean} True if there are states to redo
-             */
             canRedo() {
                 return this.redoStack.length > 0;
             }
 
-            /**
-             * Clear all history (e.g., when clearing all photos)
-             */
             clear() {
                 this.undoStack = [];
                 this.redoStack = [];
             }
         }
 
-        // Global instance for managing reorder history
         const reorderHistory = new ReorderHistory(50);
 
-        // Debounce state for rapid reorder operations
-        // Prevents state inconsistency when user rapidly reorders photos
+        // Debounce for reorder operations
         let reorderDebounceTimer = null;
-        let pendingReorderState = null; // Stores the initial state before rapid reorders
-        const REORDER_DEBOUNCE_DELAY = 100; // ms
+        let pendingReorderState = null;
+        const REORDER_DEBOUNCE_DELAY = 100;
 
-        /**
-         * Debounced save state for reorder operations
-         * When rapid reorders occur (within REORDER_DEBOUNCE_DELAY ms), only saves
-         * the initial state before the first reorder in the burst.
-         * This prevents the undo stack from being filled with intermediate states
-         * and ensures clean undo/redo behavior.
-         * @param {Array<string>} currentOrder - Current photo order (IDs) BEFORE the reorder
-         */
         function debouncedSaveReorderState(currentOrder) {
-            // If no pending state, this is the first reorder in a potential burst
-            // Save the initial state that we'll want to undo to
             if (pendingReorderState === null) {
                 pendingReorderState = [...currentOrder];
             }
 
-            // Clear any existing timer
             if (reorderDebounceTimer) {
                 clearTimeout(reorderDebounceTimer);
             }
 
-            // Set a new timer to finalize the save after the burst completes
             reorderDebounceTimer = setTimeout(() => {
-                // Burst is complete - save the initial state to the undo stack
                 if (pendingReorderState !== null) {
                     reorderHistory.saveState(pendingReorderState);
                     pendingReorderState = null;
@@ -993,107 +1166,84 @@
             }, REORDER_DEBOUNCE_DELAY);
         }
 
-        // Elementos DOM
+        // DOM elements
         const elements = {
-            dropzone: document.getElementById('dropzone'),
+            uploadZone: document.getElementById('uploadZone'),
             fileInput: document.getElementById('fileInput'),
-            fotoGrid: document.getElementById('fotoGrid'),
+            photoGrid: document.getElementById('photoGrid'),
             emptyState: document.getElementById('emptyState'),
-            statusBar: document.getElementById('statusBar'),
-            statusBadge: document.getElementById('statusBadge'),
-            fotoCount: document.getElementById('fotoCount'),
-            btnLimpar: document.getElementById('btnLimpar'),
-            btnGerarPdf: document.getElementById('btnGerarPdf'),
+            statusText: document.getElementById('statusText'),
+            photoCount: document.getElementById('photoCount'),
+            btnClear: document.getElementById('btnClear'),
+            btnGeneratePdf: document.getElementById('btnGeneratePdf'),
             btnUndo: document.getElementById('btnUndo'),
             btnRedo: document.getElementById('btnRedo'),
             loadingOverlay: document.getElementById('loadingOverlay'),
-            loadingText: document.getElementById('loadingText'),
-            loadingProgress: document.getElementById('loadingProgress'),
+            loadingTitle: document.getElementById('loadingTitle'),
+            loadingMessage: document.getElementById('loadingMessage'),
             toastContainer: document.getElementById('toastContainer'),
             previewModal: document.getElementById('previewModal'),
             previewImage: document.getElementById('previewImage'),
-            modalClose: document.getElementById('modalClose'),
+            previewClose: document.getElementById('previewClose'),
             titulo: document.getElementById('titulo'),
             obra: document.getElementById('obra'),
             responsavel: document.getElementById('responsavel')
         };
 
         // ============================================================================
-        // Utilitários
+        // Utilities
         // ============================================================================
 
-        /**
-         * Exibe um toast de notificação
-         */
         function showToast(message, type = 'success') {
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            };
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
-                <span>${message}</span>
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-message">${message}</div>
             `;
             elements.toastContainer.appendChild(toast);
 
             setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease reverse';
+                toast.style.animation = 'slideInRight 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
 
-        /**
-         * Mostra/esconde o loading overlay
-         */
-        function setLoading(show, text = 'Processando...', progress = '') {
+        function setLoading(show, title = 'Processando', message = 'Aguarde...') {
             if (show) {
                 elements.loadingOverlay.classList.remove('hidden');
-                elements.loadingText.textContent = text;
-                elements.loadingProgress.textContent = progress;
+                elements.loadingTitle.textContent = title;
+                elements.loadingMessage.textContent = message;
             } else {
                 elements.loadingOverlay.classList.add('hidden');
             }
             state.processando = show;
         }
 
-        /**
-         * Atualiza o progresso do loading
-         */
-        function updateLoadingProgress(text) {
-            elements.loadingProgress.textContent = text;
-        }
-
-        /**
-         * Atualiza a UI baseado no estado
-         */
         function updateUI() {
             const count = state.fotos.length;
 
-            // Contador de fotos
-            elements.fotoCount.textContent = `${count} foto${count !== 1 ? 's' : ''} carregada${count !== 1 ? 's' : ''}`;
+            elements.photoCount.textContent = `${count} foto${count !== 1 ? 's' : ''}`;
+            elements.btnClear.disabled = count === 0 || state.processando;
+            elements.btnGeneratePdf.disabled = count === 0 || state.processando;
 
-            // Botões
-            elements.btnLimpar.disabled = count === 0 || state.processando;
-            elements.btnGerarPdf.disabled = count === 0 || state.processando;
-
-            // Estado vazio
             elements.emptyState.classList.toggle('hidden', count > 0);
 
-            // Badge de status
             if (state.processando) {
-                elements.statusBadge.textContent = 'Processando...';
-                elements.statusBadge.className = 'status-badge processing';
+                elements.statusText.textContent = 'Processando...';
             } else {
-                elements.statusBadge.textContent = 'Pronto';
-                elements.statusBadge.className = 'status-badge ready';
+                elements.statusText.textContent = 'Sistema Operacional';
             }
 
-            // Update undo/redo buttons
             updateUndoRedoButtons();
         }
 
-        /**
-         * Updates the enabled/disabled state of undo/redo buttons
-         * Called after any reorder, undo, redo, or clear operation
-         */
         function updateUndoRedoButtons() {
             const canUndo = reorderHistory.canUndo() && state.fotos.length > 0 && !state.processando;
             const canRedo = reorderHistory.canRedo() && state.fotos.length > 0 && !state.processando;
@@ -1102,20 +1252,14 @@
             elements.btnRedo.disabled = !canRedo;
         }
 
-        /**
-         * Gera um ID único para cada foto
-         */
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
 
         // ============================================================================
-        // Processamento de Fotos
+        // Photo Processing
         // ============================================================================
 
-        /**
-         * Processa uma foto via API
-         */
         async function processarFoto(file) {
             const formData = new FormData();
             formData.append('file', file);
@@ -1133,9 +1277,6 @@
             return await response.json();
         }
 
-        /**
-         * Aplica máscara/overlay na foto
-         */
         async function aplicarMascara(foto) {
             const response = await fetch(`${API_BASE_URL}/aplicar-mascara`, {
                 method: 'POST',
@@ -1163,18 +1304,14 @@
             return await response.json();
         }
 
-        /**
-         * Gera o PDF via API
-         */
         async function gerarPdf() {
-            setLoading(true, 'Gerando PDF...', 'Preparando fotos com overlay...');
+            setLoading(true, 'Gerando PDF', 'Preparando fotos com overlay...');
 
             try {
-                // Primeiro, aplica máscara em todas as fotos
                 const fotosProcessadas = [];
                 for (let i = 0; i < state.fotos.length; i++) {
                     const foto = state.fotos[i];
-                    updateLoadingProgress(`Processando foto ${i + 1} de ${state.fotos.length}...`);
+                    elements.loadingMessage.textContent = `Processando foto ${i + 1} de ${state.fotos.length}...`;
 
                     try {
                         const resultado = await aplicarMascara(foto);
@@ -1183,7 +1320,6 @@
                             legenda: foto.legenda || ''
                         });
                     } catch (error) {
-                        // Se falhar ao aplicar máscara, usa a imagem original
                         fotosProcessadas.push({
                             imagem_base64: foto.imagem_base64,
                             legenda: foto.legenda || ''
@@ -1191,9 +1327,8 @@
                     }
                 }
 
-                updateLoadingProgress('Gerando PDF...');
+                elements.loadingMessage.textContent = 'Gerando PDF...';
 
-                // Gera o PDF
                 const response = await fetch(`${API_BASE_URL}/gerar-pdf`, {
                     method: 'POST',
                     headers: {
@@ -1214,7 +1349,6 @@
 
                 const resultado = await response.json();
 
-                // Converte base64 para blob e faz download
                 const binaryString = atob(resultado.pdf_base64);
                 const bytes = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
@@ -1222,7 +1356,6 @@
                 }
                 const blob = new Blob([bytes], { type: 'application/pdf' });
 
-                // Cria link e faz download
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -1241,9 +1374,6 @@
             }
         }
 
-        /**
-         * Processa múltiplos arquivos
-         */
         async function processarArquivos(files) {
             const filesArray = Array.from(files).filter(f =>
                 f.type === 'image/jpeg' || f.type === 'image/jpg' || f.type === 'image/png'
@@ -1259,14 +1389,14 @@
                 return;
             }
 
-            setLoading(true, 'Processando fotos...', '');
+            setLoading(true, 'Processando Fotos', '');
 
             let sucessos = 0;
             let erros = 0;
 
             for (let i = 0; i < filesArray.length; i++) {
                 const file = filesArray[i];
-                updateLoadingProgress(`Foto ${i + 1} de ${filesArray.length}: ${file.name}`);
+                elements.loadingMessage.textContent = `Foto ${i + 1} de ${filesArray.length}: ${file.name}`;
 
                 try {
                     const resultado = await processarFoto(file);
@@ -1307,87 +1437,78 @@
         }
 
         // ============================================================================
-        // Renderização
+        // Rendering
         // ============================================================================
 
-        /**
-         * Renderiza um card de foto
-         */
         function renderFotoCard(foto) {
             const index = state.fotos.findIndex(f => f.id === foto.id) + 1;
             const meta = foto.metadados;
 
             const card = document.createElement('div');
-            card.className = 'foto-card';
+            card.className = 'photo-card';
             card.id = `foto-${foto.id}`;
             card.setAttribute('data-id', foto.id);
 
             card.innerHTML = `
-                <div class="foto-card-header">
-                    <img class="foto-card-image"
+                <div class="photo-card-image-container">
+                    <img class="photo-card-image"
                          src="data:image/jpeg;base64,${foto.thumbnail_base64 || foto.imagem_base64}"
                          alt="${foto.filename}"
-                         onclick="showPreview('${foto.id}')"
-                         style="cursor: pointer;">
-                    <span class="foto-card-number">#${index}</span>
-                    <div class="foto-card-drag-handle" title="Arraste para reordenar">
-                        <div class="drag-handle-dots">
+                         onclick="showPreview('${foto.id}')">
+                    <div class="photo-card-overlay"></div>
+                    <div class="photo-number">#${String(index).padStart(3, '0')}</div>
+                    <div class="drag-handle" title="Arraste para reordenar">
+                        <div class="drag-dots">
                             <span></span><span></span>
                             <span></span><span></span>
                             <span></span><span></span>
                         </div>
                     </div>
-                    <button class="foto-card-remove" onclick="removerFoto('${foto.id}')" title="Remover foto">×</button>
+                    <button class="remove-btn" onclick="removerFoto('${foto.id}')" title="Remover">×</button>
                 </div>
-                <div class="foto-card-body">
-                    <div class="foto-filename" title="${foto.filename}">${foto.filename}</div>
-                    <div class="foto-metadata">
-                        <span class="foto-metadata-icon">📅</span>
-                        <span class="foto-metadata-value ${meta.data_hora ? 'has-data' : ''}">${meta.data_hora_formatada || '-'}</span>
+                <div class="photo-card-body">
+                    <div class="photo-filename" title="${foto.filename}">${foto.filename}</div>
+                    <div class="photo-metadata">
+                        <span class="metadata-label">DATA/HORA</span>
+                        <span class="metadata-value ${meta.data_hora ? '' : 'no-data'}">${meta.data_hora_formatada || 'Não disponível'}</span>
 
-                        <span class="foto-metadata-icon">📍</span>
-                        <span class="foto-metadata-value ${meta.tem_gps ? 'has-data' : ''}">${meta.gps_string || '-'}</span>
+                        <span class="metadata-label">GPS</span>
+                        <span class="metadata-value ${meta.tem_gps ? '' : 'no-data'}">${meta.gps_string || 'Não disponível'}</span>
 
-                        <span class="foto-metadata-icon">🧭</span>
-                        <span class="foto-metadata-value ${meta.tem_direcao ? 'has-data' : ''}">${meta.direcao_cardeal || '-'}</span>
+                        <span class="metadata-label">DIREÇÃO</span>
+                        <span class="metadata-value ${meta.tem_direcao ? '' : 'no-data'}">${meta.direcao_cardeal || 'Não disponível'}</span>
                     </div>
                     ${foto.minimapa_base64 ? `
-                        <img class="foto-minimapa"
+                        <img class="mini-map"
                              src="data:image/png;base64,${foto.minimapa_base64}"
                              alt="Mini mapa">
                     ` : ''}
-                    <div class="foto-legenda-group">
-                        <label for="legenda-${foto.id}">📝 Legenda (máx. 80 caracteres)</label>
-                        <textarea class="foto-legenda-input"
-                                  id="legenda-${foto.id}"
+                    <div class="caption-field">
+                        <label for="caption-${foto.id}">LEGENDA (MÁX. 80 CARACTERES)</label>
+                        <textarea id="caption-${foto.id}"
                                   maxlength="80"
                                   placeholder="Digite a legenda para esta foto..."
                                   oninput="atualizarLegenda('${foto.id}', this.value)">${foto.legenda}</textarea>
-                        <div class="foto-legenda-counter">
+                        <div class="caption-counter">
                             <span id="counter-${foto.id}">${foto.legenda.length}</span>/80
                         </div>
                     </div>
                 </div>
             `;
 
-            elements.fotoGrid.appendChild(card);
+            elements.photoGrid.appendChild(card);
         }
 
-        /**
-         * Re-renderiza todos os cards (para atualizar números)
-         */
         function renderAllCards() {
-            elements.fotoGrid.innerHTML = '';
+            elements.photoGrid.innerHTML = '';
             state.fotos.forEach(foto => renderFotoCard(foto));
+            initSortable();
         }
 
         // ============================================================================
-        // Handlers de Eventos
+        // Event Handlers
         // ============================================================================
 
-        /**
-         * Atualiza a legenda de uma foto
-         */
         window.atualizarLegenda = function(fotoId, valor) {
             const foto = state.fotos.find(f => f.id === fotoId);
             if (foto) {
@@ -1399,9 +1520,6 @@
             }
         };
 
-        /**
-         * Remove uma foto
-         */
         window.removerFoto = function(fotoId) {
             const index = state.fotos.findIndex(f => f.id === fotoId);
             if (index > -1) {
@@ -1412,9 +1530,6 @@
             }
         };
 
-        /**
-         * Mostra preview da foto em tamanho maior
-         */
         window.showPreview = function(fotoId) {
             const foto = state.fotos.find(f => f.id === fotoId);
             if (foto) {
@@ -1423,160 +1538,36 @@
             }
         };
 
-        /**
-         * Limpa todas as fotos
-         */
         function limparTudo() {
             if (state.fotos.length > 0 && confirm('Deseja remover todas as fotos?')) {
                 state.fotos = [];
-                elements.fotoGrid.innerHTML = '';
-                reorderHistory.clear(); // Clear undo/redo history when all photos are removed
+                elements.photoGrid.innerHTML = '';
+                reorderHistory.clear();
 
-                // Clear debounce state to prevent memory leaks
                 if (reorderDebounceTimer) {
                     clearTimeout(reorderDebounceTimer);
                     reorderDebounceTimer = null;
                 }
                 pendingReorderState = null;
 
-                updateUI(); // This will call updateUndoRedoButtons()
+                updateUI();
                 showToast('Todas as fotos foram removidas.');
             }
         }
 
-        // ============================================================================
-        // Event Listeners
-        // ============================================================================
-
-        // Dropzone - click para selecionar arquivo
-        elements.dropzone.addEventListener('click', () => {
-            if (!state.processando) {
-                elements.fileInput.click();
-            }
-        });
-
-        // Input de arquivo
-        elements.fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                processarArquivos(e.target.files);
-                e.target.value = ''; // Reset para permitir selecionar os mesmos arquivos novamente
-            }
-        });
-
-        // Drag and drop
-        elements.dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (!state.processando) {
-                elements.dropzone.classList.add('dragover');
-            }
-        });
-
-        elements.dropzone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            elements.dropzone.classList.remove('dragover');
-        });
-
-        elements.dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            elements.dropzone.classList.remove('dragover');
-            if (!state.processando && e.dataTransfer.files.length > 0) {
-                processarArquivos(e.dataTransfer.files);
-            }
-        });
-
-        // Botões
-        elements.btnLimpar.addEventListener('click', limparTudo);
-        elements.btnGerarPdf.addEventListener('click', gerarPdf);
-        elements.btnUndo.addEventListener('click', undoReorder);
-        elements.btnRedo.addEventListener('click', redoReorder);
-
-        // Modal de preview
-        elements.modalClose.addEventListener('click', () => {
-            elements.previewModal.classList.add('hidden');
-        });
-
-        elements.previewModal.addEventListener('click', (e) => {
-            if (e.target === elements.previewModal) {
-                elements.previewModal.classList.add('hidden');
-            }
-        });
-
-        // Tecla ESC para fechar modal e cancelar drag
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                // Cancel drag operation if in progress
-                if (isDragging && sortableInstance) {
-                    // Cancel the current drag operation
-                    // SortableJS doesn't have a direct cancel method, but we can
-                    // simulate it by triggering a mouseup/touchend or using the
-                    // internal method. The cleanest way is to destroy and reinit.
-                    cancelDragOperation();
-                    return;
-                }
-
-                // Close preview modal
-                if (!elements.previewModal.classList.contains('hidden')) {
-                    elements.previewModal.classList.add('hidden');
-                }
-            }
-        });
-
-        /**
-         * Cancel an in-progress drag operation
-         * Called when user presses ESC during drag
-         */
-        function cancelDragOperation() {
-            if (!isDragging || !sortableInstance) return;
-
-            // Clear the dragging state
-            isDragging = false;
-
-            // Clear any pending debounce state (cancel doesn't save to history)
-            if (reorderDebounceTimer) {
-                clearTimeout(reorderDebounceTimer);
-                reorderDebounceTimer = null;
-            }
-            pendingReorderState = null;
-
-            // Remove visual indicators
-            elements.fotoGrid.classList.remove('sortable-drag-active');
-
-            // Re-render cards to restore original order (DOM might have been modified during drag)
-            renderAllCards();
-
-            // Re-initialize sortable
-            initSortable();
-
-            showToast('Reordenação cancelada', 'warning');
-        }
-
-        // ============================================================================
-        // Keyboard Shortcuts for Undo/Redo
-        // ============================================================================
-
-        /**
-         * Apply a photo order from history to state.fotos
-         * @param {Array<string>} orderIds - Array of photo IDs in the desired order
-         */
         function applyPhotoOrder(orderIds) {
             if (!orderIds || orderIds.length === 0) return;
 
-            // Reorder state.fotos to match the saved order
             const reorderedFotos = orderIds.map(id =>
                 state.fotos.find(foto => foto.id === id)
             ).filter(Boolean);
 
-            // Only apply if we have valid photos
             if (reorderedFotos.length > 0) {
                 state.fotos = reorderedFotos;
                 renderAllCards();
-                initSortable();
             }
         }
 
-        /**
-         * Undo the last photo reorder operation
-         */
         function undoReorder() {
             if (state.fotos.length === 0 || state.processando) return;
             if (!reorderHistory.canUndo()) return;
@@ -1591,9 +1582,6 @@
             }
         }
 
-        /**
-         * Redo a previously undone photo reorder operation
-         */
         function redoReorder() {
             if (state.fotos.length === 0 || state.processando) return;
             if (!reorderHistory.canRedo()) return;
@@ -1608,34 +1596,131 @@
             }
         }
 
-        // Keyboard shortcuts: Ctrl+Z for undo, Ctrl+Y or Ctrl+Shift+Z for redo
+        // ============================================================================
+        // Sortable Initialization
+        // ============================================================================
+
+        function initSortable() {
+            if (sortableInstance) {
+                sortableInstance.destroy();
+                sortableInstance = null;
+            }
+
+            if (state.fotos.length === 0) return;
+
+            const isSortingDisabled = state.fotos.length < 2;
+
+            sortableInstance = Sortable.create(elements.photoGrid, {
+                disabled: isSortingDisabled,
+                animation: 200,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                draggable: '.photo-card',
+                forceFallback: true,
+                delayOnTouchOnly: true,
+                delay: 150,
+
+                onStart: function(evt) {
+                    isDragging = true;
+                },
+
+                onEnd: function(evt) {
+                    isDragging = false;
+
+                    if (evt.oldIndex === evt.newIndex) {
+                        return;
+                    }
+
+                    debouncedSaveReorderState(state.fotos.map(f => f.id));
+
+                    const newOrder = sortableInstance.toArray();
+                    const reorderedFotos = newOrder.map(id =>
+                        state.fotos.find(foto => foto.id === id)
+                    ).filter(Boolean);
+
+                    state.fotos = reorderedFotos;
+                    renderAllCards();
+                    updateUndoRedoButtons();
+                }
+            });
+        }
+
+        // ============================================================================
+        // Event Listeners
+        // ============================================================================
+
+        elements.uploadZone.addEventListener('click', () => {
+            if (!state.processando) {
+                elements.fileInput.click();
+            }
+        });
+
+        elements.fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processarArquivos(e.target.files);
+                e.target.value = '';
+            }
+        });
+
+        elements.uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!state.processando) {
+                elements.uploadZone.classList.add('dragover');
+            }
+        });
+
+        elements.uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            elements.uploadZone.classList.remove('dragover');
+        });
+
+        elements.uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            elements.uploadZone.classList.remove('dragover');
+            if (!state.processando && e.dataTransfer.files.length > 0) {
+                processarArquivos(e.dataTransfer.files);
+            }
+        });
+
+        elements.btnClear.addEventListener('click', limparTudo);
+        elements.btnGeneratePdf.addEventListener('click', gerarPdf);
+        elements.btnUndo.addEventListener('click', undoReorder);
+        elements.btnRedo.addEventListener('click', redoReorder);
+
+        elements.previewClose.addEventListener('click', () => {
+            elements.previewModal.classList.add('hidden');
+        });
+
+        elements.previewModal.addEventListener('click', (e) => {
+            if (e.target === elements.previewModal) {
+                elements.previewModal.classList.add('hidden');
+            }
+        });
+
         document.addEventListener('keydown', (e) => {
-            // Check if user is typing in an input or textarea
-            const activeElement = document.activeElement;
-            const isTyping = activeElement && (
-                activeElement.tagName === 'INPUT' ||
-                activeElement.tagName === 'TEXTAREA'
+            if (e.key === 'Escape') {
+                if (!elements.previewModal.classList.contains('hidden')) {
+                    elements.previewModal.classList.add('hidden');
+                }
+            }
+
+            const isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA'
             );
 
-            // Only handle Ctrl/Cmd combinations
             const isCtrlOrCmd = e.ctrlKey || e.metaKey;
             if (!isCtrlOrCmd) return;
 
-            // Undo: Ctrl+Z (without Shift)
             if (e.key === 'z' && !e.shiftKey) {
-                // If typing in input, let browser handle native undo
                 if (isTyping) return;
-
                 e.preventDefault();
                 undoReorder();
                 return;
             }
 
-            // Redo: Ctrl+Y or Ctrl+Shift+Z
             if (e.key === 'y' || (e.key === 'z' && e.shiftKey) || (e.key === 'Z' && e.shiftKey)) {
-                // If typing in input, let browser handle native redo
                 if (isTyping) return;
-
                 e.preventDefault();
                 redoReorder();
                 return;
@@ -1643,139 +1728,25 @@
         });
 
         // ============================================================================
-        // Inicialização
+        // Initialization
         // ============================================================================
 
-        // Atualiza UI inicial
         updateUI();
 
-        // Verifica conexão com API
         async function checkApiConnection() {
             try {
                 const response = await fetch(`${API_BASE_URL}/health`);
                 if (!response.ok) throw new Error('API offline');
                 const data = await response.json();
                 if (data.status === 'ok') {
-                    showToast('Conectado à API PHOTO-REPORT!');
+                    showToast('Sistema conectado à API PHOTO-REPORT');
                 }
             } catch (error) {
-                showToast('API não está disponível. Inicie o container Docker.', 'error');
+                showToast('API não disponível. Verifique o container Docker.', 'error');
             }
         }
 
-        // Verifica conexão ao carregar
         checkApiConnection();
-
-        // ============================================================================
-        // Drag-and-Drop Reordering (SortableJS)
-        // ============================================================================
-
-        /**
-         * Initialize SortableJS on the photo grid
-         * Enables drag-and-drop reordering of photo cards
-         * Handles edge cases: single photo, empty grid, drag cancel
-         */
-        function initSortable() {
-            if (sortableInstance) {
-                sortableInstance.destroy();
-                sortableInstance = null;
-            }
-
-            // Edge case: Empty grid - nothing to sort, skip initialization
-            if (state.fotos.length === 0) {
-                elements.fotoGrid.classList.remove('sorting-disabled');
-                return;
-            }
-
-            // Edge case: Single photo - disable sorting (no point in reordering 1 item)
-            // We still create the instance but disable it for consistent behavior
-            const isSortingDisabled = state.fotos.length < 2;
-
-            // Update visual state for single photo (hide drag handle, change cursor)
-            if (isSortingDisabled) {
-                elements.fotoGrid.classList.add('sorting-disabled');
-            } else {
-                elements.fotoGrid.classList.remove('sorting-disabled');
-            }
-
-            sortableInstance = Sortable.create(elements.fotoGrid, {
-                disabled: isSortingDisabled,  // Disable when only 1 photo
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                chosenClass: 'sortable-chosen',
-                dragClass: 'sortable-drag',
-                draggable: '.foto-card',
-
-                // Touch device support options
-                // Prevents accidental drags when user is trying to scroll
-                delayOnTouchOnly: true,           // Only apply delay on touch devices
-                delay: 150,                       // 150ms delay before drag starts on touch
-                fallbackTolerance: 3,             // 3px movement threshold before drag is considered intentional
-                touchStartThreshold: 5,           // 5px threshold to distinguish tap from drag
-
-                // Force fallback mode for consistent touch experience across devices
-                // This bypasses native HTML5 DnD which can be unreliable on mobile
-                forceFallback: true,
-                fallbackClass: 'sortable-fallback',
-                fallbackOnBody: true,             // Append ghost to body for better z-index handling
-
-                // Prevent text selection during drag on touch devices
-                preventOnFilter: true,
-
-                // Scroll behavior during drag
-                scroll: true,                     // Enable auto-scroll while dragging
-                scrollSensitivity: 80,            // Distance from edge to start scrolling
-                scrollSpeed: 10,                  // Scroll speed
-                bubbleScroll: true,               // Enable scrolling in parent elements
-
-                onStart: function(evt) {
-                    // Track that drag is in progress (for ESC key handling)
-                    isDragging = true;
-
-                    // Add visual indicator to grid during drag
-                    elements.fotoGrid.classList.add('sortable-drag-active');
-                },
-
-                onEnd: function(evt) {
-                    // Clear dragging state
-                    isDragging = false;
-
-                    // Remove visual indicator from grid
-                    elements.fotoGrid.classList.remove('sortable-drag-active');
-
-                    // Only process if position changed
-                    if (evt.oldIndex === evt.newIndex) {
-                        return;
-                    }
-
-                    // Save current state to undo stack before making changes (debounced)
-                    // This prevents rapid reorders from flooding the undo stack
-                    debouncedSaveReorderState(state.fotos.map(f => f.id));
-
-                    // Get the new order from DOM
-                    const newOrder = sortableInstance.toArray();
-
-                    // Reorder state.fotos to match the new DOM order
-                    const reorderedFotos = newOrder.map(id =>
-                        state.fotos.find(foto => foto.id === id)
-                    ).filter(Boolean);
-
-                    // Update state with new order
-                    state.fotos = reorderedFotos;
-
-                    // Re-render all cards to update numbers (#1, #2, etc.)
-                    renderAllCards();
-
-                    // Update undo/redo button states
-                    updateUndoRedoButtons();
-
-                    // Re-initialize sortable on the new DOM
-                    initSortable();
-                }
-            });
-        }
-
-        // Initialize Sortable on page load
         initSortable();
     </script>
 </body>
