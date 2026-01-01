@@ -1,70 +1,99 @@
 {
   "files_to_modify": {
-    "backend": [
-      "src/models/__init__.py",
-      "src/schemas/__init__.py",
-      "src/repositories/__init__.py",
-      "src/api/v1/endpoints/__init__.py",
-      "src/main.py",
-      "alembic/versions/001_initial.py"
-    ],
-    "frontend": [
-      "src/frontend/index.html"
-    ]
+    "mobile": [],
+    "web": [],
+    "backend": []
   },
   "files_to_create": {
-    "backend": [
-      "src/models/obra.py",
-      "src/schemas/obra.py",
-      "src/repositories/obra_repository.py",
-      "src/api/v1/endpoints/obras.py",
-      "alembic/versions/002_add_obras.py",
-      "tests/test_obras.py"
+    "mobile": [
+      "mobile/package.json",
+      "mobile/App.tsx",
+      "mobile/src/screens/CameraScreen.tsx",
+      "mobile/src/screens/PhotoPreviewScreen.tsx",
+      "mobile/src/screens/GalleryScreen.tsx",
+      "mobile/src/screens/SettingsScreen.tsx",
+      "mobile/src/services/LocationService.ts",
+      "mobile/src/services/StorageService.ts",
+      "mobile/src/services/SyncService.ts",
+      "mobile/src/services/ApiService.ts",
+      "mobile/src/services/GoogleAuthService.ts",
+      "mobile/src/services/DriveService.ts",
+      "mobile/src/services/OverlayService.ts"
+    ],
+    "web": [
+      "web/package.json",
+      "web/src/main.tsx",
+      "web/src/App.tsx",
+      "web/src/components/PhotoGrid.tsx",
+      "web/src/components/PhotoCard.tsx",
+      "web/src/components/PDFPreview.tsx",
+      "web/src/services/DriveService.ts",
+      "web/src/services/ApiService.ts",
+      "web/src/services/GoogleAuthService.ts"
     ]
   },
   "files_to_reference": [
-    "src/models/photo_report.py",
-    "src/models/base.py",
-    "src/schemas/photo_report.py",
-    "src/repositories/photo_report_repository.py",
-    "src/api/v1/endpoints/reports.py",
-    "alembic/versions/001_initial.py",
-    "src/frontend/index.html"
+    "src/frontend/index.html",
+    "src/core/exceptions.py",
+    ".worktrees/001-criar-sistema-photo-report-completo/src/python/processor.py",
+    ".worktrees/001-criar-sistema-photo-report-completo/src/python/overlay_generator_v2.py"
   ],
   "patterns": {
-    "model_pattern": "SQLAlchemy 2.0 with Mapped[], mapped_column(), UUID primary keys, TimestampMixin for created_at/updated_at",
-    "repository_pattern": "Class with AsyncSession, CRUD methods (create, get_by_id, list, update, delete), logging, try/except",
-    "schema_pattern": "Pydantic v2 with Base, Create, Update, Response schemas. Field() for validations, ConfigDict for ORM",
-    "api_pattern": "APIRouter with prefix/tags, Depends(get_async_session), helper _to_response() function",
-    "migration_pattern": "Alembic op.create_table, op.create_index, comments on columns, FK with ondelete=CASCADE",
-    "frontend_pattern": "CSS variables, state object, template literals, showToast(), modal with .hidden class"
+    "design_system": "LLD brand colors (navy/gold), Rajdhani headings, IBM Plex Sans body, clip-path for blueprint style",
+    "api_pattern": "FastAPI with Pydantic models, CORS middleware, base64 for images, FormData for uploads",
+    "overlay_pattern": "Solocator-style overlay V2 with compass, GPS, altitude in compact bar",
+    "frontend_pattern": "CSS variables, state object, template literals, showToast(), modal with .hidden class",
+    "react_pattern": "Functional components with hooks, TypeScript, zustand for state, react-query for API",
+    "mobile_pattern": "Expo with TypeScript, expo-camera, expo-location, AsyncStorage for offline-first"
   },
   "existing_implementations": {
-    "description": "PhotoReport/PhotoItem models exist in worktree-004 with full CRUD patterns. Need to follow same structure for Obra model.",
+    "description": "Backend FastAPI exists with /processar-foto, /aplicar-mascara, /gerar-pdf endpoints. Frontend is static HTML that will be migrated to React.",
     "relevant_files": [
-      ".worktrees/004-persist-ncia-real-no-postgresql/src/models/photo_report.py",
-      ".worktrees/004-persist-ncia-real-no-postgresql/src/repositories/photo_report_repository.py",
-      ".worktrees/004-persist-ncia-real-no-postgresql/src/schemas/photo_report.py",
-      ".worktrees/004-persist-ncia-real-no-postgresql/src/api/v1/endpoints/reports.py"
+      ".worktrees/001-criar-sistema-photo-report-completo/src/python/processor.py",
+      "src/frontend/index.html"
     ],
-    "notes": "Main branch has minimal structure. Need to ensure models/schemas/repos directories exist or are created."
+    "backend_endpoints": {
+      "processar_foto": "POST /processar-foto - extracts EXIF, generates thumbnail and minimap",
+      "aplicar_mascara": "POST /aplicar-mascara - applies overlay to image",
+      "gerar_pdf": "POST /gerar-pdf - generates PDF report from photos",
+      "health": "GET /health - health check"
+    }
   },
   "tech_stack": {
-    "language": "python",
-    "framework": "fastapi",
-    "validation": "pydantic v2",
-    "settings": "pydantic-settings",
-    "orm": "sqlalchemy 2.0",
-    "migrations": "alembic",
-    "database_driver": "asyncpg",
-    "testing": "pytest",
-    "frontend": "vanilla html/css/javascript"
+    "backend": {
+      "language": "python",
+      "framework": "fastapi",
+      "image_processing": "pillow",
+      "pdf": "weasyprint",
+      "maps": "py-staticmaps"
+    },
+    "mobile": {
+      "language": "typescript",
+      "framework": "expo (react-native)",
+      "camera": "expo-camera",
+      "location": "expo-location",
+      "storage": "expo-file-system, AsyncStorage"
+    },
+    "web": {
+      "language": "typescript",
+      "framework": "react",
+      "bundler": "vite",
+      "state": "zustand",
+      "api": "react-query",
+      "dnd": "dnd-kit"
+    }
   },
   "naming_conventions": {
-    "models": "PascalCase (Obra, PhotoReport)",
-    "tables": "snake_case plural (obras, photo_reports)",
-    "endpoints": "snake_case (criar_obra, listar_obras)",
-    "variables": "snake_case Portuguese (nome_obra, endereco)",
-    "docstrings": "Portuguese, Google-style"
+    "components": "PascalCase (PhotoGrid, CameraScreen)",
+    "services": "PascalCase with Service suffix (LocationService)",
+    "hooks": "camelCase with use prefix (usePhotoOrder)",
+    "types": "PascalCase (PhotoMetadata, DriveFile)",
+    "files_ts": "PascalCase.tsx for components, camelCase.ts for utilities"
+  },
+  "google_drive_structure": {
+    "root": "DiarioObra",
+    "projects": "Projetos/[Nome do Projeto]",
+    "folders": ["originais", "com_mascara", "validadas"],
+    "metadata_file": "metadados.json"
   }
 }

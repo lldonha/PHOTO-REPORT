@@ -1,21 +1,43 @@
 {
-  "project_type": "single",
+  "project_type": "monorepo",
   "services": {
     "backend": {
       "path": ".",
-      "tech_stack": ["python", "fastapi", "pydantic", "sqlalchemy", "alembic"],
+      "tech_stack": ["python", "fastapi", "pydantic", "pillow", "weasyprint"],
       "port": 8000,
       "external_port": 8002,
       "dev_command": "uvicorn src.main:app --reload --host 0.0.0.0 --port 8000",
       "test_command": "pytest tests/ -v",
-      "entry_point": "src/main.py"
+      "entry_point": "src/main.py",
+      "existing": true
+    },
+    "mobile": {
+      "path": "mobile",
+      "tech_stack": ["typescript", "expo", "react-native", "expo-camera", "expo-location"],
+      "port": 19000,
+      "metro_port": 8081,
+      "dev_command": "npx expo start",
+      "test_command": "npm test",
+      "entry_point": "App.tsx",
+      "existing": false
+    },
+    "web": {
+      "path": "web",
+      "tech_stack": ["typescript", "react", "vite", "dnd-kit", "react-query", "zustand"],
+      "port": 5173,
+      "dev_command": "npm run dev",
+      "test_command": "npm test",
+      "entry_point": "src/main.tsx",
+      "existing": false
     },
     "frontend": {
       "path": "src/frontend",
       "tech_stack": ["html", "css", "javascript"],
       "port": 8080,
       "dev_command": "python -m http.server 8080 -d src/frontend",
-      "type": "static"
+      "type": "static",
+      "existing": true,
+      "note": "Legacy frontend, will be replaced by web service"
     },
     "postgresql": {
       "path": ".",
@@ -28,7 +50,8 @@
   "infrastructure": {
     "docker": true,
     "database": "postgresql",
-    "docker_compose": "docker-compose.yml"
+    "docker_compose": "docker-compose.yml",
+    "external_apis": ["google-drive", "google-maps"]
   },
   "conventions": {
     "linter": "none",
@@ -49,6 +72,32 @@
     "core": "src/core",
     "migrations": "alembic/versions",
     "frontend": "src/frontend",
-    "uploads": "uploads"
+    "uploads": "uploads",
+    "mobile": "mobile",
+    "web": "web"
+  },
+  "design_system": {
+    "colors": {
+      "navy_primary": "#1B3A5C",
+      "navy_deep": "#0F1F35",
+      "blue_accent": "#2B5A8F",
+      "gold_accent": "#D4A574",
+      "gold_hover": "#C49564",
+      "steel": "#4A5568",
+      "concrete": "#E5E7EB",
+      "white": "#FFFFFF",
+      "off_white": "#F8FAFC"
+    },
+    "typography": {
+      "headings": "Rajdhani",
+      "body": "IBM Plex Sans",
+      "code": "JetBrains Mono"
+    },
+    "patterns": [
+      "clip-path for blueprint style",
+      "grid background",
+      "toast notifications",
+      "modal with .hidden class"
+    ]
   }
 }
