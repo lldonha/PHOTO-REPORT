@@ -1,0 +1,278 @@
+# PHOTO-REPORT: Sistema Completo de Relatórios Fotográficos de Obra
+
+## CONTEXTO
+
+Criar sistema inspirado no SoloCator para engenheiros tirarem fotos de obra com overlay automático de GPS/bússola/data, sincronização com Google Drive, e geração de relatórios PDF profissionais.
+
+**Referências visuais:** Veja fotos de exemplo em `referencias/` e documentação em `Context/referencias-solocator.md`
+
+## STACK TÉCNICO
+
+### Backend (JÁ EXISTE - REUTILIZAR)
+- FastAPI Python (porta 8002)
+- Endpoints prontos: /processar-foto, /aplicar-mascara, /gerar-pdf, /health
+- Pillow para overlay
+- py-staticmaps para mini-mapas
+- WeasyPrint para PDF
+- Localização: E:\Projetos\PHOTO-REPORT\backend\src\python\
+
+### Mobile (CRIAR - Spec 001)
+- **Expo (React Native)** - Framework principal
+- expo-camera - Captura de fotos
+- expo-location - GPS e bússola
+- expo-file-system - Armazenamento local
+- AsyncStorage - Offline-first database
+- react-native-google-drive-api-wrapper - Sync
+
+### Web Interface (CRIAR - Spec 002)
+- **React + Vite** - Framework
+- **dnd-kit** - Drag-and-drop para reordenar fotos
+- **A2UI-inspired components** - UI moderna e interativa
+- Integração com backend FastAPI existente
+
+### Sync (CRIAR - Spec 003)
+- Google Drive API
+- OAuth 2.0 authentication
+- Sync bidirecional (mobile ↔ drive ↔ web)
+
+## FUNCIONALIDADES PRINCIPAIS
+
+### 1. App Mobile (Expo) - SPEC 001
+
+**Captura de Fotos:**
+- Câmera integrada com expo-camera
+- GPS automático via expo-location
+- Bússola/orientação automática
+- SEMPRE salvar 2 versões:
+  - `originais/foto-{timestamp}.jpg` - Sem modificação
+  - `com_mascara/foto-{timestamp}.jpg` - Com overlay
+
+**Overlay Automático:**
+- Barra inferior preta semi-transparente
+- Campos exibidos:
+  ```
+  📅 Data/Hora: 31/12/2025 14:30
+  📍 GPS: -15.789123, -47.890456
+  🧭 Direção: NE (45°)
+  📝 Project: [Nome do Projeto]
+  📝 Description: [Descrição da foto]
+  📝 Notes: [Observações adicionais]
+  ```
+
+**Campos Editáveis:**
+- Project Name (texto curto)
+- Photo Description (texto médio)
+- Notes (texto longo, opcional)
+- Edição inline ANTES de aplicar máscara
+
+**Offline-First:**
+- AsyncStorage para metadados
+- Filesystem local para fotos
+- Queue de sync quando online
+- Indicador visual de "pendente sync"
+
+**Google Drive Sync:**
+- Autenticação OAuth Google
+- Estrutura de pastas automática:
+  ```
+  DiarioObra/
+  └── Projetos/
+      └── [Nome do Projeto]/
+          ├── originais/
+          ├── com_mascara/
+          ├── validadas/
+          └── metadados.json
+  ```
+- Sync incremental (apenas novas/modificadas)
+- Conflict resolution (último timestamp vence)
+
+**Backend Integration:**
+- Chamar FastAPI /processar-foto para extrair EXIF
+- Chamar /aplicar-mascara para gerar versão com overlay
+- Usar py-staticmaps para mini-mapa (opcional no mobile)
+
+### 2. Web Interface (React) - SPEC 002
+
+**Layout Inspirado A2UI:**
+- Grid responsivo de fotos
+- Cards com:
+  - Thumbnail da foto
+  - Mini-mapa (se GPS disponível)
+  - Metadados (data, GPS, bússola)
+  - Campos editáveis inline
+  - Checkbox "Incluir no PDF"
+  - Ícone de status (original/com máscara/validada)
+
+**Componentes Dinâmicos:**
+- Photo Grid (drag-and-drop com dnd-kit)
+- Inline Text Editor (legendas)
+- Map Viewer (mini-mapa expandível)
+- Timeline Viewer (fotos ordenadas cronologicamente)
+- Filtros (projeto, data, status)
+- Preview de PDF antes de gerar
+
+**Modo "Big Picture":**
+- Visualização compacta de TODAS as fotos
+- Edição contextual (vê outras fotos enquanto edita)
+- Reordenação visual (arrastar e soltar)
+- Marcação bulk (incluir/excluir múltiplas fotos)
+
+**Integração com Backend:**
+- Ler fotos do Google Drive
+- Editar legendas e salvar metadados.json
+- Adicionar mini-mapas sob demanda (botão "Adicionar Mapa")
+- Gerar PDF final via /gerar-pdf
+
+**Geração de PDF:**
+- Template customizável
+- 6 fotos por página (grid 2x3)
+- Cabeçalho: Título, Obra, Responsável, Data
+- Fotos com overlay + mini-mapa (se selecionado)
+- Rodapé com paginação
+- Export em alta qualidade (90% JPEG)
+
+### 3. Google Drive Sync - SPEC 003
+
+**Autenticação:**
+- OAuth 2.0 flow
+- Refresh token persistence
+- Multi-device support
+
+**Estrutura de Pastas:**
+- Criar automaticamente se não existir
+- Permissões: owner (usuário autenticado)
+- Metadados em JSON:
+  ```json
+  {
+    "version": "1.0",
+    "projeto": "Nome do Projeto",
+    "fotos": [
+      {
+        "id": "uuid",
+        "filename": "foto-123.jpg",
+        "timestamp": "2025-12-31T14:30:00Z",
+        "gps": {"lat": -15.789, "lon": -47.890},
+        "direction": 45,
+        "fields": {
+          "project": "Obra XPTO",
+          "description": "Fachada frontal",
+          "notes": "Revisar acabamento"
+        },
+        "status": "com_mascara",
+        "incluirPDF": true
+      }
+    ]
+  }
+  ```
+
+**Sync Bidirecional:**
+- Mobile → Drive: Upload novas fotos + metadados
+- Drive → Web: Download e exibição
+- Web → Drive: Salvar edições em metadados.json
+- Conflict resolution: timestamp mais recente vence
+
+**Otimizações:**
+- Resumable uploads (fotos grandes)
+- Thumbnail generation local
+- Delta sync (apenas mudanças)
+- Cache local de metadados
+
+## PADRÕES E REFERÊNCIAS
+
+### Design System
+- **Mobile:** Material Design 3 (React Native Paper)
+- **Web:** Modern minimal (inspirado A2UI Composer)
+- **Cores:** Neutras com acentos azul (#007bff)
+- **Tipografia:** Inter/Roboto
+
+### Backend API (EXISTENTE)
+- Base URL: `http://localhost:8002`
+- CORS habilitado
+- Documentação: `http://localhost:8002/docs` (Swagger)
+
+### Overlay Pattern (do backend existente)
+```python
+# Já implementado em overlay_generator.py
+- Altura barra: 100px
+- Fundo: (0, 0, 0, 200) # Preto semi-transparente
+- Ícones: Emojis nativos (📅📍🧭📝)
+- Fontes: DejaVuSans.ttf ou Arial
+- Legenda: Cor amarela para destaque
+```
+
+## CRITÉRIOS DE SUCESSO
+
+### Spec 001 - Mobile App
+- [ ] Captura foto e extrai GPS/bússola
+- [ ] Salva 2 versões (original + máscara)
+- [ ] Campos editáveis antes de aplicar overlay
+- [ ] Funciona 100% offline
+- [ ] Sync com Google Drive quando online
+- [ ] Indicador visual de status de sync
+
+### Spec 002 - Web Interface
+- [ ] Exibe grid de fotos do Google Drive
+- [ ] Edição inline de legendas
+- [ ] Drag-and-drop para reordenar
+- [ ] Adiciona mini-mapas sob demanda
+- [ ] Preview de PDF antes de gerar
+- [ ] Gera PDF com fotos selecionadas
+
+### Spec 003 - Google Drive Sync
+- [ ] OAuth funcional
+- [ ] Estrutura de pastas automática
+- [ ] Sync incremental (não re-upload tudo)
+- [ ] Conflict resolution funciona
+- [ ] metadados.json sempre atualizado
+
+## REFERÊNCIAS TÉCNICAS
+
+### SoloCator (inspiração)
+- 2 versões de foto (original + overlay)
+- Campos: Project, Description, Notes
+- GPS + bússola + data/hora
+- Export KML/KMZ (futuro)
+
+### CAAL (arquitetura)
+- Local-first com sync cloud
+- Tools via webhooks
+- Auto-discovery de funcionalidades
+
+### A2UI (UI/UX)
+- Componentes dinâmicos
+- Agent-driven interface
+- Cross-platform (web/mobile)
+- JSON declarativo para widgets
+
+### Backend Existente
+- Código em: `E:\Projetos\PHOTO-REPORT\backend\src\python\`
+- Arquivos principais:
+  - `processor.py` - API FastAPI
+  - `exif_extractor.py` - Extração GPS/data
+  - `overlay_generator.py` - Aplicação de máscara
+  - `map_generator.py` - Mini-mapas
+  - `pdf_generator.py` - Geração de PDF
+
+## IMPORTANTE
+
+1. **NÃO recriar backend** - Reutilizar Python existente
+2. **Stack mobile:** Expo (React Native), NÃO Flutter
+3. **Stack web:** React + Vite, NÃO Next.js
+4. **2 versões SEMPRE:** original intocável + com overlay
+5. **Offline-first:** App funciona sem internet
+6. **Google Drive:** Estrutura de pastas padronizada
+7. **A2UI style:** Componentes modernos e interativos
+
+## ORDEM DE IMPLEMENTAÇÃO
+
+1. **Spec 001:** Mobile App (Expo) - Captura + Sync
+2. **Spec 002:** Web Interface (React) - Visualização + PDF
+3. **Spec 003:** Google Drive Sync - Bidirecional robusto
+
+## NOTAS ADICIONAIS
+
+- Budget: FREE stack (sem serviços pagos além de Claude MAX)
+- Usuários: Solo dev + beta testers
+- Deploy: Docker local + Cloudflare Tunnel
+- Git: Usar worktrees do Auto-Claude
+- QA: Validação automática antes de merge
