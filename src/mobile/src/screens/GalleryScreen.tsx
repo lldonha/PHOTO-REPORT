@@ -12,12 +12,19 @@ import {
     RefreshControl,
     Alert,
     SafeAreaView,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Photo } from '../types/photo';
 import { getPhotos, updatePhotoCaption, deletePhoto } from '../services/database';
 import PhotoFilters, { DateFilter, DirectionFilter } from '../components/PhotoFilters';
 import { CaptureMode } from '../types/photo';
+import {
+    exportPhotosAsZip,
+    exportPhotosAsKML,
+    exportPhotosAsKMZ,
+    getExportStats
+} from '../services/exportService';
 
 interface Props {
     refreshTrigger?: number;
@@ -33,6 +40,11 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
     const [dateFilter, setDateFilter] = useState<DateFilter>('all');
     const [directionFilter, setDirectionFilter] = useState<DirectionFilter>('all');
     const [captureModeFilter, setCaptureModeFilter] = useState<CaptureMode | 'all'>('all');
+
+    // Selection mode for export
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+    const [exporting, setExporting] = useState(false);
 
     const loadPhotos = useCallback(async () => {
         try {
@@ -79,6 +91,80 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
                     onPress: async () => {
                         await deletePhoto(photo.id);
                         loadPhotos();
+                    },
+                },
+            ]
+        );
+    };
+
+    // Selection handlers
+    const toggleSelectionMode = () => {
+        setSelectionMode(!selectionMode);
+        setSelectedPhotos(new Set());
+    };
+
+    const togglePhotoSelection = (photoId: string) => {
+        const newSelection = new Set(selectedPhotos);
+        if (newSelection.has(photoId)) {
+            newSelection.delete(photoId);
+        } else {
+            newSelection.add(photoId);
+        }
+        setSelectedPhotos(newSelection);
+    };
+
+    const selectAllPhotos = () => {
+        const allIds = new Set(filteredPhotos.map(p => p.id));
+        setSelectedPhotos(allIds);
+    };
+
+    const deselectAllPhotos = () => {
+        setSelectedPhotos(new Set());
+    };
+
+    // Export handlers
+    const handleExport = (format: 'zip' | 'kml' | 'kmz') => {
+        const photosToExport = photos.filter(p => selectedPhotos.has(p.id));
+
+        if (photosToExport.length === 0) {
+            Alert.alert('Erro', 'Selecione pelo menos uma foto para exportar');
+            return;
+        }
+
+        const stats = getExportStats(photosToExport);
+        const message = format === 'zip'
+            ? `Exportar ${stats.total} fotos (~${stats.estimatedSizeMB.toFixed(0)} MB) como ZIP?\n\n` +
+              `• Original: ${stats.total}\n` +
+              `• Com overlay: ${stats.withOverlay}\n` +
+              `• Com GPS: ${stats.withGPS}`
+            : `Exportar ${stats.withGPS} fotos com GPS como ${format.toUpperCase()}?\n\n` +
+              `(${stats.total - stats.withGPS} fotos sem GPS serão ignoradas)`;
+
+        Alert.alert(
+            'Confirmar Exportação',
+            message,
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Exportar',
+                    onPress: async () => {
+                        setExporting(true);
+                        try {
+                            if (format === 'zip') {
+                                await exportPhotosAsZip(photosToExport);
+                            } else if (format === 'kml') {
+                                await exportPhotosAsKML(photosToExport);
+                            } else if (format === 'kmz') {
+                                await exportPhotosAsKMZ(photosToExport);
+                            }
+                            Alert.alert('Sucesso', 'Fotos exportadas com sucesso!');
+                            setSelectionMode(false);
+                            setSelectedPhotos(new Set());
+                        } catch (error: any) {
+                            Alert.alert('Erro', error.message || 'Falha ao exportar fotos');
+                        } finally {
+                            setExporting(false);
+                        }
                     },
                 },
             ]
@@ -166,15 +252,35 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
     const renderPhoto = ({ item }: { item: Photo }) => {
         const syncIcon = getSyncIcon(item.syncStatus);
         const isEditing = editingId === item.id;
+        const isSelected = selectedPhotos.has(item.id);
 
         return (
-            <View style={styles.photoCard}>
+            <TouchableOpacity
+                style={[styles.photoCard, isSelected && styles.photoCardSelected]}
+                onPress={() => selectionMode && togglePhotoSelection(item.id)}
+                disabled={!selectionMode}
+                activeOpacity={selectionMode ? 0.7 : 1}
+            >
                 <Image source={{ uri: item.localUri }} style={styles.photoImage} />
 
+                {/* Selection checkbox */}
+                {selectionMode && (
+                    <TouchableOpacity
+                        style={styles.selectionCheckbox}
+                        onPress={() => togglePhotoSelection(item.id)}
+                    >
+                        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                            {isSelected && <Ionicons name="checkmark" size={20} color="white" />}
+                        </View>
+                    </TouchableOpacity>
+                )}
+
                 {/* Sync status badge */}
-                <View style={styles.syncBadge}>
-                    <Ionicons name={syncIcon.name} size={16} color={syncIcon.color} />
-                </View>
+                {!selectionMode && (
+                    <View style={styles.syncBadge}>
+                        <Ionicons name={syncIcon.name} size={16} color={syncIcon.color} />
+                    </View>
+                )}
 
                 {/* Metadata */}
                 <View style={styles.metadata}>
@@ -225,23 +331,93 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
                 </View>
 
                 {/* Actions */}
-                <View style={styles.actions}>
-                    <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteButton}>
-                        <Ionicons name="trash-outline" size={20} color="#ef4444" />
-                    </TouchableOpacity>
-                </View>
-            </View>
+                {!selectionMode && (
+                    <View style={styles.actions}>
+                        <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteButton}>
+                            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </TouchableOpacity>
         );
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Galeria</Text>
-                <Text style={styles.headerCount}>
-                    {filteredPhotos.length} {filteredPhotos.length !== photos.length && `de ${photos.length}`} fotos
-                </Text>
+                <View style={styles.headerLeft}>
+                    <Text style={styles.headerTitle}>Galeria</Text>
+                    <Text style={styles.headerCount}>
+                        {selectionMode
+                            ? `${selectedPhotos.size} selecionada${selectedPhotos.size !== 1 ? 's' : ''}`
+                            : `${filteredPhotos.length} ${filteredPhotos.length !== photos.length ? `de ${photos.length}` : ''} fotos`
+                        }
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    onPress={toggleSelectionMode}
+                    style={styles.headerButton}
+                >
+                    <Ionicons
+                        name={selectionMode ? 'close' : 'download-outline'}
+                        size={24}
+                        color="#D4A574"
+                    />
+                </TouchableOpacity>
             </View>
+
+            {/* Export controls */}
+            {selectionMode && (
+                <View style={styles.exportControls}>
+                    <View style={styles.selectionButtons}>
+                        <TouchableOpacity
+                            onPress={selectAllPhotos}
+                            style={styles.selectionButton}
+                        >
+                            <Text style={styles.selectionButtonText}>Todas</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={deselectAllPhotos}
+                            style={styles.selectionButton}
+                        >
+                            <Text style={styles.selectionButtonText}>Nenhuma</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.exportButtons}>
+                        <TouchableOpacity
+                            onPress={() => handleExport('zip')}
+                            style={[styles.exportButton, styles.exportButtonZip]}
+                            disabled={exporting || selectedPhotos.size === 0}
+                        >
+                            {exporting ? (
+                                <ActivityIndicator size="small" color="white" />
+                            ) : (
+                                <>
+                                    <Ionicons name="archive-outline" size={20} color="white" />
+                                    <Text style={styles.exportButtonText}>ZIP</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleExport('kml')}
+                            style={[styles.exportButton, styles.exportButtonKml]}
+                            disabled={exporting || selectedPhotos.size === 0}
+                        >
+                            <Ionicons name="location-outline" size={20} color="white" />
+                            <Text style={styles.exportButtonText}>KML</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleExport('kmz')}
+                            style={[styles.exportButton, styles.exportButtonKmz]}
+                            disabled={exporting || selectedPhotos.size === 0}
+                        >
+                            <Ionicons name="globe-outline" size={20} color="white" />
+                            <Text style={styles.exportButtonText}>KMZ</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
 
             {/* Filters */}
             <PhotoFilters
@@ -298,6 +474,9 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#1B3A5C',
     },
+    headerLeft: {
+        flex: 1,
+    },
     headerTitle: {
         fontSize: 24,
         fontWeight: '700',
@@ -306,6 +485,59 @@ const styles = StyleSheet.create({
     headerCount: {
         fontSize: 14,
         color: '#D4A574',
+        marginTop: 4,
+    },
+    headerButton: {
+        padding: 8,
+    },
+    exportControls: {
+        backgroundColor: '#1B3A5C',
+        padding: 16,
+        gap: 12,
+    },
+    selectionButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    selectionButton: {
+        backgroundColor: '#0F1F35',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#D4A574',
+    },
+    selectionButtonText: {
+        color: '#D4A574',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    exportButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    exportButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingVertical: 12,
+        borderRadius: 8,
+    },
+    exportButtonZip: {
+        backgroundColor: '#3b82f6',
+    },
+    exportButtonKml: {
+        backgroundColor: '#22c55e',
+    },
+    exportButtonKmz: {
+        backgroundColor: '#8b5cf6',
+    },
+    exportButtonText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '600',
     },
     list: {
         padding: 16,
@@ -316,6 +548,30 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: 16,
+    },
+    photoCardSelected: {
+        borderWidth: 3,
+        borderColor: '#D4A574',
+    },
+    selectionCheckbox: {
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        zIndex: 10,
+    },
+    checkbox: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderWidth: 2,
+        borderColor: 'white',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    checkboxSelected: {
+        backgroundColor: '#D4A574',
+        borderColor: '#D4A574',
     },
     photoImage: {
         width: '100%',

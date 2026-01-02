@@ -17,7 +17,7 @@ export async function initDatabase(): Promise<void> {
       description TEXT,
       createdAt TEXT NOT NULL
     );
-    
+
     CREATE TABLE IF NOT EXISTS photos (
       id TEXT PRIMARY KEY,
       localUri TEXT NOT NULL,
@@ -29,6 +29,7 @@ export async function initDatabase(): Promise<void> {
       accuracy REAL,
       timestamp TEXT,
       direction REAL,
+      captureMode TEXT,
       caption TEXT DEFAULT '',
       projectId TEXT,
       createdAt TEXT NOT NULL,
@@ -37,7 +38,7 @@ export async function initDatabase(): Promise<void> {
       remoteId TEXT,
       FOREIGN KEY (projectId) REFERENCES projects(id)
     );
-    
+
     CREATE INDEX IF NOT EXISTS idx_photos_sync ON photos(syncStatus);
     CREATE INDEX IF NOT EXISTS idx_photos_project ON photos(projectId);
   `);
@@ -89,8 +90,8 @@ export async function savePhoto(photo: Photo): Promise<void> {
     await database.runAsync(
         `INSERT INTO photos (
       id, localUri, localUriWithOverlay, thumbnail, latitude, longitude, altitude, accuracy,
-      timestamp, direction, caption, projectId, createdAt, syncStatus, syncedAt, remoteId
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      timestamp, direction, captureMode, caption, projectId, createdAt, syncStatus, syncedAt, remoteId
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             photo.id,
             photo.localUri,
@@ -102,6 +103,7 @@ export async function savePhoto(photo: Photo): Promise<void> {
             photo.metadata.accuracy,
             photo.metadata.timestamp,
             photo.metadata.direction,
+            photo.metadata.captureMode || null,
             photo.caption,
             photo.projectId,
             photo.createdAt,
@@ -134,7 +136,8 @@ export async function getPhotos(projectId?: string): Promise<Photo[]> {
             altitude: row.altitude,
             accuracy: row.accuracy,
             timestamp: row.timestamp,
-            direction: row.direction
+            direction: row.direction,
+            captureMode: row.captureMode
         },
         caption: row.caption,
         projectId: row.projectId,
@@ -162,7 +165,8 @@ export async function getPendingPhotos(): Promise<Photo[]> {
             altitude: row.altitude,
             accuracy: row.accuracy,
             timestamp: row.timestamp,
-            direction: row.direction
+            direction: row.direction,
+            captureMode: row.captureMode
         },
         caption: row.caption,
         projectId: row.projectId,
