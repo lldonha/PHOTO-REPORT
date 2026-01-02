@@ -21,6 +21,7 @@ export async function initDatabase(): Promise<void> {
     CREATE TABLE IF NOT EXISTS photos (
       id TEXT PRIMARY KEY,
       localUri TEXT NOT NULL,
+      localUriWithOverlay TEXT,
       thumbnail TEXT,
       latitude REAL,
       longitude REAL,
@@ -87,12 +88,13 @@ export async function savePhoto(photo: Photo): Promise<void> {
     const database = await getDb();
     await database.runAsync(
         `INSERT INTO photos (
-      id, localUri, thumbnail, latitude, longitude, altitude, accuracy,
+      id, localUri, localUriWithOverlay, thumbnail, latitude, longitude, altitude, accuracy,
       timestamp, direction, caption, projectId, createdAt, syncStatus, syncedAt, remoteId
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             photo.id,
             photo.localUri,
+            photo.localUriWithOverlay || null,
             photo.thumbnail || null,
             photo.metadata.latitude,
             photo.metadata.longitude,
@@ -124,6 +126,7 @@ export async function getPhotos(projectId?: string): Promise<Photo[]> {
     return rows.map(row => ({
         id: row.id,
         localUri: row.localUri,
+        localUriWithOverlay: row.localUriWithOverlay,
         thumbnail: row.thumbnail,
         metadata: {
             latitude: row.latitude,
@@ -151,6 +154,7 @@ export async function getPendingPhotos(): Promise<Photo[]> {
     return rows.map(row => ({
         id: row.id,
         localUri: row.localUri,
+        localUriWithOverlay: row.localUriWithOverlay,
         thumbnail: row.thumbnail,
         metadata: {
             latitude: row.latitude,

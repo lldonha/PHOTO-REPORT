@@ -12,6 +12,7 @@ export interface PhotoMetadata {
 export interface Photo {
   id: string;
   localUri: string;
+  localUriWithOverlay?: string; // Photo with SoloCator-style overlay
   thumbnail?: string;
   metadata: PhotoMetadata;
   caption: string;

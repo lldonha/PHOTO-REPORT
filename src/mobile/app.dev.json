@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Photo Report (Dev)",
+    "slug": "photo-report-dev",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F1F35"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lldonha.photoreport.dev"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F1F35"
+      },
+      "package": "com.lldonha.photoreport.dev"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
