@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { Paths, Directory, File } from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { Photo, PhotoMetadata, Project, CaptureMode } from '../types/photo';
@@ -59,6 +60,12 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
     // Alignment grid toggle
     const [showGrid, setShowGrid] = useState(false);
 
+    // Screen orientation
+    const [orientationLocked, setOrientationLocked] = useState(false);
+    const [currentOrientation, setCurrentOrientation] = useState<ScreenOrientation.Orientation>(
+        ScreenOrientation.Orientation.PORTRAIT_UP
+    );
+
     // Photo with overlay processing
     const overlayViewRef = useRef<View>(null);
     const [photoForOverlay, setPhotoForOverlay] = useState<{ uri: string; width: number; height: number } | null>(null);
@@ -68,7 +75,40 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
         startLocationWatch();
         loadCurrentProject();
         startHeadingWatch();
+        setupOrientation();
+
+        return () => {
+            // Unlock orientation on unmount
+            ScreenOrientation.unlockAsync();
+        };
     }, []);
+
+    const setupOrientation = async () => {
+        // Allow all orientations by default
+        await ScreenOrientation.unlockAsync();
+
+        // Listen for orientation changes
+        ScreenOrientation.addOrientationChangeListener((event) => {
+            setCurrentOrientation(event.orientationInfo.orientation);
+        });
+
+        // Get current orientation
+        const orientation = await ScreenOrientation.getOrientationAsync();
+        setCurrentOrientation(orientation);
+    };
+
+    const toggleOrientationLock = async () => {
+        if (orientationLocked) {
+            // Unlock - allow all orientations
+            await ScreenOrientation.unlockAsync();
+            setOrientationLocked(false);
+        } else {
+            // Lock to current orientation
+            const orientation = await ScreenOrientation.getOrientationAsync();
+            await ScreenOrientation.lockAsync(orientation);
+            setOrientationLocked(true);
+        }
+    };
 
     const startHeadingWatch = () => {
         // Update heading every second
@@ -367,14 +407,25 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
 
                 {/* Controls */}
                 <View style={styles.controls}>
-                    {/* Grid toggle */}
-                    <TouchableOpacity style={styles.controlButton} onPress={() => setShowGrid(!showGrid)}>
-                        <Ionicons
-                            name={showGrid ? "grid" : "grid-outline"}
-                            size={28}
-                            color={showGrid ? "#D4A574" : "white"}
-                        />
-                    </TouchableOpacity>
+                    <View style={styles.leftControls}>
+                        {/* Grid toggle */}
+                        <TouchableOpacity style={styles.controlButton} onPress={() => setShowGrid(!showGrid)}>
+                            <Ionicons
+                                name={showGrid ? "grid" : "grid-outline"}
+                                size={28}
+                                color={showGrid ? "#D4A574" : "white"}
+                            />
+                        </TouchableOpacity>
+
+                        {/* Orientation lock */}
+                        <TouchableOpacity style={styles.controlButton} onPress={toggleOrientationLock}>
+                            <Ionicons
+                                name={orientationLocked ? "lock-closed" : "lock-open-outline"}
+                                size={28}
+                                color={orientationLocked ? "#D4A574" : "white"}
+                            />
+                        </TouchableOpacity>
+                    </View>
 
                     {/* Capture button */}
                     <TouchableOpacity
@@ -520,9 +571,13 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 24,
+    },
+    leftControls: {
+        flexDirection: 'column',
+        gap: 12,
     },
     controlButton: {
         width: 60,

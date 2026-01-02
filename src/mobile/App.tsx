@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import CameraScreen from './src/screens/CameraScreen';
 import GalleryScreen from './src/screens/GalleryScreen';
+import MapScreen from './src/screens/MapScreen';
 import SyncScreen from './src/screens/SyncScreen';
 import { initDatabase } from './src/services/database';
 
@@ -82,6 +83,8 @@ export default function App() {
               iconName = focused ? 'camera' : 'camera-outline';
             } else if (route.name === 'Galeria') {
               iconName = focused ? 'images' : 'images-outline';
+            } else if (route.name === 'Mapa') {
+              iconName = focused ? 'map' : 'map-outline';
             } else if (route.name === 'Sync') {
               iconName = focused ? 'cloud' : 'cloud-outline';
             }
@@ -95,6 +98,9 @@ export default function App() {
         </Tab.Screen>
         <Tab.Screen name="Galeria">
           {() => <GalleryScreen refreshTrigger={refreshTrigger} />}
+        </Tab.Screen>
+        <Tab.Screen name="Mapa">
+          {() => <MapScreen refreshTrigger={refreshTrigger} />}
         </Tab.Screen>
         <Tab.Screen name="Sync">
           {() => <SyncScreen refreshTrigger={refreshTrigger} />}

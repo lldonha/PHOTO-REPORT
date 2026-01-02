@@ -1,6 +1,6 @@
 // Gallery Screen - View and manage captured photos
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -16,6 +16,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Photo } from '../types/photo';
 import { getPhotos, updatePhotoCaption, deletePhoto } from '../services/database';
+import PhotoFilters, { DateFilter, DirectionFilter } from '../components/PhotoFilters';
+import { CaptureMode } from '../types/photo';
 
 interface Props {
     refreshTrigger?: number;
@@ -26,6 +28,11 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
     const [refreshing, setRefreshing] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editCaption, setEditCaption] = useState('');
+
+    // Filter states
+    const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+    const [directionFilter, setDirectionFilter] = useState<DirectionFilter>('all');
+    const [captureModeFilter, setCaptureModeFilter] = useState<CaptureMode | 'all'>('all');
 
     const loadPhotos = useCallback(async () => {
         try {
@@ -77,6 +84,71 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
             ]
         );
     };
+
+    // Helper functions for filtering
+    const getCardinalDirection = (degrees: number | null): DirectionFilter | null => {
+        if (degrees === null) return null;
+        const cardinals: DirectionFilter[] = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const index = Math.round(degrees / 45) % 8;
+        return cardinals[index];
+    };
+
+    const isWithinDateRange = (timestamp: string, filter: DateFilter): boolean => {
+        const photoDate = new Date(timestamp);
+        const now = new Date();
+        const diffTime = now.getTime() - photoDate.getTime();
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+        switch (filter) {
+            case 'today':
+                return diffDays < 1;
+            case 'week':
+                return diffDays < 7;
+            case 'month':
+                return diffDays < 30;
+            case 'all':
+                return true;
+            default:
+                return true;
+        }
+    };
+
+    // Filtered photos
+    const filteredPhotos = useMemo(() => {
+        return photos.filter((photo) => {
+            // Date filter
+            if (!isWithinDateRange(photo.metadata.timestamp, dateFilter)) {
+                return false;
+            }
+
+            // Direction filter
+            if (directionFilter !== 'all') {
+                const photoDirection = getCardinalDirection(photo.metadata.direction);
+                if (photoDirection !== directionFilter) {
+                    return false;
+                }
+            }
+
+            // Capture mode filter
+            if (captureModeFilter !== 'all') {
+                if (photo.metadata.captureMode !== captureModeFilter) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }, [photos, dateFilter, directionFilter, captureModeFilter]);
+
+    // Photo counts for filter badges
+    const photoCounts = useMemo(() => {
+        return {
+            today: photos.filter((p) => isWithinDateRange(p.metadata.timestamp, 'today')).length,
+            week: photos.filter((p) => isWithinDateRange(p.metadata.timestamp, 'week')).length,
+            month: photos.filter((p) => isWithinDateRange(p.metadata.timestamp, 'month')).length,
+            all: photos.length,
+        };
+    }, [photos]);
 
     const getSyncIcon = (status: Photo['syncStatus']) => {
         switch (status) {
@@ -166,8 +238,21 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Galeria</Text>
-                <Text style={styles.headerCount}>{photos.length} fotos</Text>
+                <Text style={styles.headerCount}>
+                    {filteredPhotos.length} {filteredPhotos.length !== photos.length && `de ${photos.length}`} fotos
+                </Text>
             </View>
+
+            {/* Filters */}
+            <PhotoFilters
+                dateFilter={dateFilter}
+                directionFilter={directionFilter}
+                captureModeFilter={captureModeFilter}
+                onDateFilterChange={setDateFilter}
+                onDirectionFilterChange={setDirectionFilter}
+                onCaptureModeFilterChange={setCaptureModeFilter}
+                photoCounts={photoCounts}
+            />
 
             {photos.length === 0 ? (
                 <View style={styles.emptyState}>
@@ -175,9 +260,15 @@ export default function GalleryScreen({ refreshTrigger }: Props) {
                     <Text style={styles.emptyText}>Nenhuma foto capturada</Text>
                     <Text style={styles.emptySubtext}>Use a câmera para tirar fotos da obra</Text>
                 </View>
+            ) : filteredPhotos.length === 0 ? (
+                <View style={styles.emptyState}>
+                    <Ionicons name="filter-outline" size={64} color="#4a5568" />
+                    <Text style={styles.emptyText}>Nenhuma foto encontrada</Text>
+                    <Text style={styles.emptySubtext}>Ajuste os filtros para ver mais fotos</Text>
+                </View>
             ) : (
                 <FlatList
-                    data={photos}
+                    data={filteredPhotos}
                     keyExtractor={(item) => item.id}
                     renderItem={renderPhoto}
                     contentContainerStyle={styles.list}
