@@ -23,6 +23,7 @@ import { savePhoto } from '../services/database';
 import { getCurrentProject, updateCurrentProjectName } from '../services/projectManager';
 import CompassOverlay from '../components/CompassOverlay';
 import PhotoWithOverlayPreview from '../components/PhotoWithOverlayPreview';
+import AlignmentGrid from '../components/AlignmentGrid';
 import { processPhotoWithOverlay } from '../services/photoProcessor';
 
 interface Props {
@@ -50,6 +51,9 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
 
     // Compass heading
     const [heading, setHeading] = useState<number | null>(null);
+
+    // Alignment grid toggle
+    const [showGrid, setShowGrid] = useState(false);
 
     // Photo with overlay processing
     const overlayViewRef = useRef<View>(null);
@@ -321,6 +325,9 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
             </View>
 
             <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
+                {/* Alignment Grid */}
+                <AlignmentGrid visible={showGrid} />
+
                 {/* Compass Overlay */}
                 {heading !== null && (
                     <View style={styles.compassOverlay}>
@@ -344,9 +351,13 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
 
                 {/* Controls */}
                 <View style={styles.controls}>
-                    {/* Flip camera */}
-                    <TouchableOpacity style={styles.controlButton} onPress={toggleFacing}>
-                        <Ionicons name="camera-reverse-outline" size={32} color="white" />
+                    {/* Grid toggle */}
+                    <TouchableOpacity style={styles.controlButton} onPress={() => setShowGrid(!showGrid)}>
+                        <Ionicons
+                            name={showGrid ? "grid" : "grid-outline"}
+                            size={28}
+                            color={showGrid ? "#D4A574" : "white"}
+                        />
                     </TouchableOpacity>
 
                     {/* Capture button */}
@@ -362,8 +373,10 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
                         )}
                     </TouchableOpacity>
 
-                    {/* Placeholder for symmetry */}
-                    <View style={styles.controlButton} />
+                    {/* Flip camera */}
+                    <TouchableOpacity style={styles.controlButton} onPress={toggleFacing}>
+                        <Ionicons name="camera-reverse-outline" size={32} color="white" />
+                    </TouchableOpacity>
                 </View>
             </CameraView>
 
