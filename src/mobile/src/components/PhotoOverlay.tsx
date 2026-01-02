@@ -1,9 +1,10 @@
 // Photo Overlay - Complete SoloCator-style overlay for photos
 // Includes compass, GPS info, and caption
+// Supports 3 capture modes: Compass, Building, Street
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { PhotoMetadata } from '../types/photo';
+import { PhotoMetadata, CaptureMode } from '../types/photo';
 import CompassOverlay from './CompassOverlay';
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
     caption: string;
     width: number;
     height: number;
+    captureMode?: CaptureMode;
 }
 
 // Convert degrees to cardinal direction
@@ -19,6 +21,19 @@ const degreesToCardinal = (degrees: number): string => {
     const cardinals = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
     const index = Math.round(degrees / 22.5) % 16;
     return cardinals[index];
+};
+
+// Get building elevation suffix based on direction (for Building mode)
+const getBuildingElevation = (degrees: number): string => {
+    const cardinal = degreesToCardinal(degrees);
+    // Convert short cardinal to full word
+    const fullCardinal: { [key: string]: string } = {
+        'N': 'North', 'NNE': 'North-Northeast', 'NE': 'Northeast', 'ENE': 'East-Northeast',
+        'E': 'East', 'ESE': 'East-Southeast', 'SE': 'Southeast', 'SSE': 'South-Southeast',
+        'S': 'South', 'SSW': 'South-Southwest', 'SW': 'Southwest', 'WSW': 'West-Southwest',
+        'W': 'West', 'WNW': 'West-Northwest', 'NW': 'Northwest', 'NNW': 'North-Northwest',
+    };
+    return `${fullCardinal[cardinal] || cardinal} Elevation`;
 };
 
 // Format date to match SoloCator style
@@ -37,20 +52,28 @@ const formatDate = (isoString: string): string => {
     return `${day} ${monthName}. ${year} ${hours}:${minutes}:${seconds}`;
 };
 
-export default function PhotoOverlay({ metadata, projectName, caption, width, height }: Props) {
+export default function PhotoOverlay({ metadata, projectName, caption, width, height, captureMode = 'compass' }: Props) {
     const { latitude, longitude, altitude, accuracy, direction, timestamp } = metadata;
+
+    // Building mode: Add elevation suffix to project name
+    const displayProjectName = captureMode === 'building' && direction !== null
+        ? `${projectName} - ${getBuildingElevation(direction)}`
+        : projectName;
 
     return (
         <View style={[styles.container, { width, height }]}>
-            {/* Compass at top */}
-            {direction !== null && (
+            {/* Compass at top (only in Compass mode) */}
+            {captureMode === 'compass' && direction !== null && (
                 <View style={styles.compassContainer}>
                     <CompassOverlay heading={direction} />
                 </View>
             )}
 
-            {/* GPS Info bar below compass */}
-            <View style={styles.gpsBar}>
+            {/* GPS Info bar */}
+            <View style={[
+                styles.gpsBar,
+                captureMode === 'compass' ? { top: 120 } : { top: 16 }
+            ]}>
                 <Text style={styles.gpsText}>
                     {direction !== null && `🧭 ${Math.round(direction)}°${degreesToCardinal(direction)} (T) `}
                     {latitude !== null && longitude !== null &&
@@ -62,8 +85,8 @@ export default function PhotoOverlay({ metadata, projectName, caption, width, he
 
             {/* Caption at bottom right */}
             <View style={styles.captionContainer}>
-                {projectName && (
-                    <Text style={styles.projectText}>{projectName}</Text>
+                {displayProjectName && (
+                    <Text style={styles.projectText}>{displayProjectName}</Text>
                 )}
                 {caption && (
                     <Text style={styles.captionText}>{caption}</Text>

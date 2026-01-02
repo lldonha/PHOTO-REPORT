@@ -18,12 +18,13 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
 import { Paths, Directory, File } from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
-import { Photo, PhotoMetadata, Project } from '../types/photo';
+import { Photo, PhotoMetadata, Project, CaptureMode } from '../types/photo';
 import { savePhoto } from '../services/database';
 import { getCurrentProject, updateCurrentProjectName } from '../services/projectManager';
 import CompassOverlay from '../components/CompassOverlay';
 import PhotoWithOverlayPreview from '../components/PhotoWithOverlayPreview';
 import AlignmentGrid from '../components/AlignmentGrid';
+import CaptureModeSelector from '../components/CaptureModeSelector';
 import { processPhotoWithOverlay } from '../services/photoProcessor';
 
 interface Props {
@@ -51,6 +52,9 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
 
     // Compass heading
     const [heading, setHeading] = useState<number | null>(null);
+
+    // Capture mode (Compass, Building, Street)
+    const [captureMode, setCaptureMode] = useState<CaptureMode>('compass');
 
     // Alignment grid toggle
     const [showGrid, setShowGrid] = useState(false);
@@ -158,6 +162,7 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
                 accuracy: currentLocation?.coords.accuracy ?? null,
                 timestamp: new Date().toISOString(),
                 direction: heading,
+                captureMode: captureMode,
             };
 
             // Save to app's document directory using new API
@@ -324,19 +329,30 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
                 />
             </View>
 
+            {/* Capture Mode Selector */}
+            <View style={styles.modeSelectorContainer}>
+                <CaptureModeSelector
+                    currentMode={captureMode}
+                    onModeChange={setCaptureMode}
+                />
+            </View>
+
             <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
                 {/* Alignment Grid */}
                 <AlignmentGrid visible={showGrid} />
 
-                {/* Compass Overlay */}
-                {heading !== null && (
+                {/* Compass Overlay (only in Compass mode) */}
+                {captureMode === 'compass' && heading !== null && (
                     <View style={styles.compassOverlay}>
                         <CompassOverlay heading={heading} />
                     </View>
                 )}
 
                 {/* GPS Status indicator */}
-                <View style={[styles.gpsIndicator, heading !== null && { top: 140 }]}>
+                <View style={[
+                    styles.gpsIndicator,
+                    captureMode === 'compass' && heading !== null ? { top: 140 } : { top: 16 }
+                ]}>
                     <Ionicons
                         name={location ? 'location' : 'location-outline'}
                         size={20}
@@ -435,6 +451,7 @@ export default function CameraScreen({ onPhotoTaken }: Props) {
                     caption={description.trim()}
                     width={photoForOverlay.width}
                     height={photoForOverlay.height}
+                    captureMode={capturedPhoto.metadata.captureMode}
                 />
             )}
         </View>
@@ -549,6 +566,12 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '600',
+    },
+    modeSelectorContainer: {
+        backgroundColor: '#1B3A5C',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        alignItems: 'center',
     },
     modalContainer: {
         flex: 1,

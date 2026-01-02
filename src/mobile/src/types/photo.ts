@@ -1,5 +1,7 @@
 // Types for Photo Report Mobile App
 
+export type CaptureMode = 'compass' | 'building' | 'street';
+
 export interface PhotoMetadata {
   latitude: number | null;
   longitude: number | null;
@@ -7,6 +9,7 @@ export interface PhotoMetadata {
   accuracy: number | null;
   timestamp: string;
   direction: number | null;
+  captureMode?: CaptureMode; // Mode used when photo was taken
 }
 
 export interface Photo {

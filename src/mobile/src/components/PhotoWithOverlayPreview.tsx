@@ -3,7 +3,7 @@
 import React, { forwardRef } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import PhotoOverlay from './PhotoOverlay';
-import { PhotoMetadata } from '../types/photo';
+import { PhotoMetadata, CaptureMode } from '../types/photo';
 
 interface Props {
     photoUri: string;
@@ -12,10 +12,11 @@ interface Props {
     caption: string;
     width: number;
     height: number;
+    captureMode?: CaptureMode;
 }
 
 const PhotoWithOverlayPreview = forwardRef<View, Props>(
-    ({ photoUri, metadata, projectName, caption, width, height }, ref) => {
+    ({ photoUri, metadata, projectName, caption, width, height, captureMode }, ref) => {
         return (
             <View ref={ref} style={[styles.container, { width, height }]}>
                 {/* Photo */}
@@ -32,6 +33,7 @@ const PhotoWithOverlayPreview = forwardRef<View, Props>(
                     caption={caption}
                     width={width}
                     height={height}
+                    captureMode={captureMode}
                 />
             </View>
         );
