@@ -104,21 +104,32 @@
 
 ---
 
-## 🚀 BUILD EM PROGRESSO
+## 🚀 BUILD COMPLETO
 
-### **v1.0.0 - MVP Mobile**
+### **v1.0.0 - MVP Mobile** ✅
 
-**Status:** ⏳ Processando no EAS (background task b56da27)
+**Status:** ✅ **COMPLETO E DISPONÍVEL!**
+
+**Build ID:** `8e9c4ce1-323b-4edb-a732-bc31f683fd75`
+
+**Download:** https://expo.dev/accounts/lldonha/projects/photo-report/builds/8e9c4ce1-323b-4edb-a732-bc31f683fd75
 
 **Features incluídas:**
 - Sprint 1 completo (60% paridade)
 - Sprint 2 completo (80% paridade)
 - 14/18 features do SoloCator
+- Grid de alinhamento
+- 3 modos de captura (Compass/Building/Street)
+- Filtros de galeria (data/direção/modo)
+- Mapa interativo com pins coloridos
+- Rotação automática + lock de orientação
+- Bússola + GPS + Overlay completo
 
-**Quando completar:**
-- Link de download APK será fornecido
-- Pronto para testes e uso real
-- Pode ser distribuído para beta testers
+**Como instalar:**
+1. Abra o link acima no celular Android
+2. Ou escaneie o QR code na página
+3. Baixe e instale o APK
+4. Pronto para uso real!
 
 ---
 
@@ -265,9 +276,9 @@
 ## 🔗 LINKS IMPORTANTES
 
 ### **Builds:**
-- v0.4.0: https://expo.dev/accounts/lldonha/projects/photo-report/builds/167baca7-cd8e-4df3-8573-d0f2b2b6a50c
-- v0.5.0: https://expo.dev/accounts/lldonha/projects/photo-report/builds/3dd88fea-33cc-47e1-a2c6-65a96d289b99
-- v1.0.0: ⏳ Em progresso
+- v0.4.0 (Sprint 1 - Grid): https://expo.dev/accounts/lldonha/projects/photo-report/builds/167baca7-cd8e-4df3-8573-d0f2b2b6a50c
+- v0.5.0 (Sprint 1 - 3 Modos): https://expo.dev/accounts/lldonha/projects/photo-report/builds/3dd88fea-33cc-47e1-a2c6-65a96d289b99
+- **v1.0.0 (MVP - 80% paridade):** ✅ https://expo.dev/accounts/lldonha/projects/photo-report/builds/8e9c4ce1-323b-4edb-a732-bc31f683fd75
 
 ### **Repositório:**
 - GitHub: https://github.com/lldonha/PHOTO-REPORT
@@ -280,10 +291,10 @@
 
 ## ✅ TODO LIST ATUAL
 
-- [x] Sprint 1: Grid + 3 Modos de Captura
-- [x] Sprint 2: Filtros + Mapa + Rotação
-- [ ] Build v1.0.0 (em progresso - EAS)
-- [ ] **Decisão:** Sprint 3 Mobile OU Web MVP com Auto-Claude
+- [x] Sprint 1: Grid + 3 Modos de Captura (60% paridade)
+- [x] Sprint 2: Filtros + Mapa + Rotação (80% paridade)
+- [x] Build v1.0.0 - MVP Mobile ✅ **COMPLETO!**
+- [ ] **Decisão próximos passos:** Sprint 3 Mobile OU Web MVP com Auto-Claude
 
 ---
 
